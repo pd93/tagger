@@ -2,15 +2,23 @@
 
 // Libraries
 import * as vscode from 'vscode';
+import * as functions from './functions';
 
 // Activate the extension
 export function activate(context: vscode.ExtensionContext) {
+    
+    // Fetch the tagger settings from the user's config
+    var settings = vscode.workspace.getConfiguration('tagger');
 
-    // // Display a message box to the user
-    // let disposable = vscode.commands.registerCommand('extension.sayHello', () => {
-    //     vscode.window.showInformationMessage('Hello World!');
-    // });
-    // context.subscriptions.push(disposable);
+    // Display a list of tags
+    let cmdRefresh = vscode.commands.registerCommand('tagger.refresh', () => {
+
+        // Fetch a list of tags
+        var tags = functions.findTags(settings.patterns);
+    });
+
+    // Push all the commands
+    context.subscriptions.push(cmdRefresh);
 }
 
 // Deactivate the extension
