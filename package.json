@@ -19,7 +19,24 @@
                 "command": "tagger.refresh",
                 "title": "Tagger: Refresh"
             }
-        ]
+        ],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "tagger",
+                    "title": "Tagger",
+                    "icon": "res/tagger.svg"
+                }
+            ]
+        },
+        "views": {
+            "tagger": [
+                {
+                    "id": "tagger-tags",
+                    "name": "Tags"
+                }
+            ]
+        }
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
