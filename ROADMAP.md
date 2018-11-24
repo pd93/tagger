@@ -1,29 +1,20 @@
 # pd93 / tagger / roadmap
 
-## v0.1.0
-
-- Regex pattern matching
-- Capture groups
-- List tags
-
-## v0.2.0
-
-- Highlight tags
-- Per tag styling
-
----
-
 ## v1.0.0
 
-- Language agnostic comment recognition
+- Regex pattern matching
 - Tag browser
+- Capture groups
+- Highlight tags
+- Travis CI
 
 ## v1.1.0
 
 - Tag Actions
+- Language agnostic comment recognition
 
 ---
 
 ## Future
 
-- Gitlab/Github support ?
+- Gitlab/Github support

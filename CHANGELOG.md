@@ -1,3 +1,5 @@
 # pd93 / tagger / changelog
 
-## 0.1.0
+## 1.0.0
+
+- Regex pattern matching
