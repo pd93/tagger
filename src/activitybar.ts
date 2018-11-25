@@ -61,9 +61,9 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 
 	constructor(
 		private patterns: structures.Pattern[],
-		private include: string = "**/*",
-		private exclude: string = "",
-		private maxResults: number = 100
+		private include: string,
+		private exclude: string,
+		private maxResults: number
 	) {
 		console.log("Creating TagTreeDataProvider...");
     }

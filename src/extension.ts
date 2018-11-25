@@ -2,12 +2,14 @@
 
 import * as vscode from 'vscode';
 import * as activitybar from './activitybar';
+import * as structures from './structures';
+import * as utils from './utils';
 
 // Activate the extension
 export function activate(context: vscode.ExtensionContext) {
     
     // Fetch the tagger settings from the user's config
-    var settings = vscode.workspace.getConfiguration('tagger');
+    var settings: structures.Settings = utils.getSettings();
 
     //
     // Trees

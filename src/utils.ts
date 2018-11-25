@@ -3,6 +3,25 @@
 import * as vscode from 'vscode';
 import * as structures from './structures';
 
+// GetSettings will fetch the workspace configuration settings and place them in a settings structure
+export function getSettings(): structures.Settings {
+    
+    // Get the workspace config
+    let config = vscode.workspace.getConfiguration("tagger");
+
+    // Assign the settings or their defaults
+    let settings: structures.Settings = {
+        updateOn: config.get("updateOn") || "change",
+        include: config.get("include") || "**/*",
+        exclude: config.get("exclude") || "",
+        maxResults: config.get("maxResults") || 100,
+        patterns: config.get("patterns") || []
+    };
+
+    return settings;
+}
+
+// FindTagsByPattern will scan a given text document for matches to a single tag pattern
 export function findTagsByPattern(pattern: structures.Pattern, document: vscode.TextDocument): structures.Tag[] {
 
     console.log(`Finding tags for pattern: '${pattern.name}'...`);
@@ -35,7 +54,7 @@ export function findTagsByPattern(pattern: structures.Pattern, document: vscode.
     return tags;
 }
 
-// FindTags will scan the active text editor for matches to the configured tag patterns
+// FindTags will scan a given text document for matches to all series of tag patterns
 export function findTags(patterns: structures.Pattern[], document: vscode.TextDocument): structures.Tag[] {
 
     console.log("Finding tags...");

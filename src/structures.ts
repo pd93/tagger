@@ -2,6 +2,14 @@
 
 import * as vscode from 'vscode';
 
+export interface Settings {
+    updateOn: string;
+    include: string;
+    exclude: string;
+    maxResults: number;
+    patterns: Pattern[];
+}
+
 export interface Pattern {
     name: string;
     pattern: string;
