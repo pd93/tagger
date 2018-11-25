@@ -1,3 +1,7 @@
+'use strict';
+
+import * as vscode from 'vscode';
+
 export interface Pattern {
     name: string;
     pattern: string;
@@ -15,6 +19,8 @@ export interface Style {
 
 export interface Tag {
     name: string;
-    start: number;
-    end: number;
+    text: string;
+    filepath: string;
+    start: vscode.Position;
+    end: vscode.Position;
 }
