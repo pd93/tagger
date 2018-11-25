@@ -1,6 +1,5 @@
 'use strict';
 
-// Libraries
 import * as vscode from 'vscode';
 import * as activitybar from './activitybar';
 
@@ -34,6 +33,27 @@ export function activate(context: vscode.ExtensionContext) {
         // Refresh the tree view
         taggerTreeDataProvider.refresh();
     };
+
+    //
+    // Listeners
+    //
+
+    if (settings.updateOn === "change") {
+
+        // Listen to document change events
+        vscode.workspace.onDidChangeTextDocument(event => {
+            if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
+                refresh();
+            }
+        }, null, context.subscriptions);
+
+    } else if (settings.updateOn === "save") {
+
+        // Listen to save document events
+        vscode.workspace.onDidSaveTextDocument(event => {
+            refresh();
+        }, null, context.subscriptions);
+    }
 
     //
     // Commands

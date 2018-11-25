@@ -1,6 +1,5 @@
 'use strict';
 
-// Libraries
 import * as vscode from 'vscode';
 import * as utils from './utils';
 import * as structures from './structures';
