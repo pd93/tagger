@@ -21,8 +21,8 @@ export function getSettings(): structures.Settings {
     return settings;
 }
 
-// FindTagsByPattern will scan a given text document for matches to a single tag pattern
-export function findTagsByPattern(pattern: structures.Pattern, document: vscode.TextDocument): structures.Tag[] {
+// FindTags will scan a given text document for matches to a single tag pattern
+export function findTags(pattern: structures.Pattern, document: vscode.TextDocument): structures.Tag[] {
 
     console.log(`Finding tags for pattern: '${pattern.name}'...`);
 
@@ -47,24 +47,6 @@ export function findTagsByPattern(pattern: structures.Pattern, document: vscode.
             start: document.positionAt(match.index),
             end: document.positionAt(match.index + match[0].length)
         });
-    }
-
-    console.log(tags);
-
-    return tags;
-}
-
-// FindTags will scan a given text document for matches to all series of tag patterns
-export function findTags(patterns: structures.Pattern[], document: vscode.TextDocument): structures.Tag[] {
-
-    console.log("Finding tags...");
-
-    // Init
-    let tags: structures.Tag[] = [];
-
-    // Loop through each tag
-    for (let pattern of patterns) {
-        tags.push(...findTagsByPattern(pattern, document));
     }
 
     console.log(tags);
