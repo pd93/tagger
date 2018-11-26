@@ -53,3 +53,25 @@ export function findTags(pattern: structures.Pattern, document: vscode.TextDocum
 
     return tags;
 }
+
+export function createDecorationTypes(patterns: structures.Pattern[]): Map<string, vscode.TextEditorDecorationType> {
+
+    console.log("Creating decoration types...");
+
+    // Init
+    let decorationTypes: Map<string, vscode.TextEditorDecorationType> = new Map();
+    let options: vscode.DecorationRenderOptions = {};
+
+    // Loop through the patterns and add the styles
+    for (let pattern of patterns) {
+
+        // Set the decoration options
+        options.backgroundColor = pattern.style.backgroundColor;
+        options.color = pattern.style.color;
+        options.textDecoration = pattern.style.bold ? "bold" : "";
+
+        decorationTypes.set(pattern.name, vscode.window.createTextEditorDecorationType(options));
+    }
+
+    return decorationTypes;
+}
