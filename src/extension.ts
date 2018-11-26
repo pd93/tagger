@@ -70,6 +70,13 @@ export function activate(context: vscode.ExtensionContext) {
         }, null, context.subscriptions);
     }
 
+    // Listen for when the active editor changes
+    vscode.window.onDidChangeActiveTextEditor(editor => {
+        if (editor) {
+            refreshDecorations();
+        }
+    }, null, context.subscriptions);
+
     //
     // Commands
     //
