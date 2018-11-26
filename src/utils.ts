@@ -75,3 +75,39 @@ export function createDecorationTypes(patterns: structures.Pattern[]): Map<strin
 
     return decorationTypes;
 }
+
+// Decorate will decorate the active text editor by highlighting tags
+export function decorate(patterns: structures.Pattern[], decorationTypes: Map<string, vscode.TextEditorDecorationType>) {
+    
+    console.log("Decorating editor...");
+
+    // Init
+    let editor = vscode.window.activeTextEditor;
+    if (!editor || !editor.document) {
+        return;
+    }
+    
+    // Loop through the patterns
+    for (let pattern of patterns) {
+
+        // Init
+        let ranges: vscode.Range[] = [];
+    
+        // Fetch the tags in the active editor
+        let tags = findTags(pattern, editor.document);
+
+        // Loop through the tags
+        for (let tag of tags) {
+            ranges.push(new vscode.Range(tag.start, tag.end));
+        }
+
+        // Get the decoration type
+        let decorationType = decorationTypes.get(pattern.name);
+        if (!decorationType) {
+            throw new Error(`No decoration type found for pattern: '${pattern.name}'`);
+        }
+
+        // Set the decorations
+        editor.setDecorations(decorationType, ranges);
+    }
+}
