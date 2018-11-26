@@ -60,17 +60,10 @@ export function createDecorationTypes(patterns: structures.Pattern[]): Map<strin
 
     // Init
     let decorationTypes: Map<string, vscode.TextEditorDecorationType> = new Map();
-    let options: vscode.DecorationRenderOptions = {};
 
     // Loop through the patterns and add the styles
     for (let pattern of patterns) {
-
-        // Set the decoration options
-        options.backgroundColor = pattern.style.backgroundColor;
-        options.color = pattern.style.color;
-        options.textDecoration = pattern.style.bold ? "bold" : "";
-
-        decorationTypes.set(pattern.name, vscode.window.createTextEditorDecorationType(options));
+        decorationTypes.set(pattern.name, vscode.window.createTextEditorDecorationType(pattern.style));
     }
 
     return decorationTypes;
