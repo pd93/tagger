@@ -2,9 +2,7 @@
 
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
-import { Pattern } from '../classes/pattern';
-import { Tag } from '../classes/tag';
-import { Settings } from './settings';
+import { Pattern, Tag, Settings } from './';
 
 export class Tagger {
 

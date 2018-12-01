@@ -2,9 +2,7 @@
 
 import * as vscode from 'vscode';
 import * as log from './utils/log';
-import { Tagger } from './classes/tagger';
-import { TaggerTreeDataProvider } from './classes/taggerTreeDataProvider';
-import { Tag } from './classes/tag';
+import { Tagger, TaggerTreeDataProvider, Tag } from './classes';
 
 // Activate the extension
 export function activate(context: vscode.ExtensionContext) {
@@ -119,7 +117,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(vscode.commands.registerCommand('tagger.refresh', refresh));
 
     // Refresh everything
-    refresh();
+    // refresh();
 }
 
 // Deactivate the extension

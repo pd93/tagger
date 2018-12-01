@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { Pattern } from '../classes/pattern';
+import { Pattern } from './';
 
 export class Settings {
 

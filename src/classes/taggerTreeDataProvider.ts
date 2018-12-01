@@ -2,9 +2,7 @@
 
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
-import { Tagger } from './tagger';
-import { Pattern } from '../classes/pattern';
-import { TaggerTreeItem } from './taggerTreeItem';
+import { Tagger, Pattern, TaggerTreeItem } from './';
 
 // TaggerTreeDataProvide will provide data to the tag view in the tagger activity tab
 export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTreeItem> {
