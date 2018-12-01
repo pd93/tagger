@@ -3,8 +3,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as log from '../utils/log';
-import { Tag } from '../interfaces';
 import { Pattern } from '../classes/pattern';
+import { Tag } from '../classes/tag';
 
 // TaggerTreeItem corresponds to a single tag item listed in the TagTree
 export class TaggerTreeItem extends vscode.TreeItem {

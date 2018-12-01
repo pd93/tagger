@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
 import { Pattern } from '../classes/pattern';
-import { Tag } from '../interfaces';
+import { Tag } from '../classes/tag';
 import { Settings } from './settings';
 
 export class Tagger {
@@ -77,16 +77,14 @@ export class Tagger {
 
     // updateTagsForDocument will remove and re-add the tags for given document
     public updateTagsForDocument(document: vscode.TextDocument): void {
-        
-        log.Info(`- Updating tags for file: '${document.fileName}'...`);
 
         // Remove the existing tags
-        let added = this.removeTagsForDocument(document);
+        let removed = this.removeTagsForDocument(document);
     
         // Add the new tags
-        let removed = this.addTagsForDocument(document);
-
-        log.Debug(`Added: ${added} - Removed: ${removed} - Total: ${added-removed}`);
+        let added = this.addTagsForDocument(document);
+        
+        log.Info(`- (+${added} -${removed} = ${added-removed}) Updated tags for file: '${document.fileName}'`);
     }
 
     // getTagsForDocument will return an array of tags found in a given document
@@ -161,13 +159,13 @@ export class Tagger {
 
             // Loop through all the matches and add them to an array
             while (match = pattern.regexp.exec(document.getText())) {
-                this.tags.push({
-                    name: pattern.name,
-                    text: match[0],
-                    filepath: document.uri.fsPath,
-                    start: document.positionAt(match.index),
-                    end: document.positionAt(match.index + match[0].length)
-                });
+                this.tags.push(new Tag(
+                    pattern.name,
+                    match[0],
+                    document.uri.fsPath,
+                    document.positionAt(match.index),
+                    document.positionAt(match.index + match[0].length)
+                ));
 
                 count++;
             }
