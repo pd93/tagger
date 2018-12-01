@@ -2,7 +2,8 @@
 
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
-import { Tag, Pattern } from '../interfaces';
+import { Pattern } from '../classes/pattern';
+import { Tag } from '../interfaces';
 import { Settings } from './settings';
 
 export class Tagger {
@@ -154,20 +155,12 @@ export class Tagger {
         // Init
         let count: number = 0;
         let match: RegExpExecArray | null;
-        let re;
         
         // Loop through the patterns
         for (let pattern of this.settings.patterns) {
-            
-            // Create a new regex object
-            if (pattern.caseSensitive) {
-                re = new RegExp(pattern.pattern, 'g');
-            } else {
-                re = new RegExp(pattern.pattern, 'gi');
-            }
 
             // Loop through all the matches and add them to an array
-            while (match = re.exec(document.getText())) {
+            while (match = pattern.regexp.exec(document.getText())) {
                 this.tags.push({
                     name: pattern.name,
                     text: match[0],

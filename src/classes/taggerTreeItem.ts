@@ -3,7 +3,8 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as log from '../utils/log';
-import { Tag, Pattern } from '../interfaces';
+import { Tag } from '../interfaces';
+import { Pattern } from '../classes/pattern';
 
 // TaggerTreeItem corresponds to a single tag item listed in the TagTree
 export class TaggerTreeItem extends vscode.TreeItem {
@@ -47,7 +48,7 @@ export class TaggerTreeItem extends vscode.TreeItem {
 	// Tooltip will return a string to be displayed when hovering over the tree item
     get tooltip(): string {
 		if (this.type === "pattern" && this.pattern) {
-			return `${this.pattern.pattern}`;
+			return `${this.pattern.regexp.source}`;
 		} else if (this.type === "tag" && this.tag) {
 			return `File: '${this.tag.filepath}' Line: ${this.tag.start.line + 1} Col: ${this.tag.start.character + 1}`;
 		} else {

@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import { Pattern } from '../interfaces';
+import { Pattern } from '../classes/pattern';
 
 export class Settings {
 
@@ -14,7 +14,13 @@ export class Settings {
         this.updateOn = config.get("updateOn") || "change";
         this.include = config.get("include") || "**/*";
         this.exclude = config.get("exclude") || "";
-        this.patterns = config.get("patterns") || [];
+        this.patterns = [];
+
+        // Fetch the patterns a instances of Pattern
+        let patterns: Pattern[] = config.get("patterns") || [];
+        for (let pattern of patterns) {
+            this.patterns.push(new Pattern(pattern.name, pattern.pattern, pattern.caseSensitive, pattern.style));
+        }
     }
 
     public updateOn: string;
