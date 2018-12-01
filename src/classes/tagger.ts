@@ -114,8 +114,8 @@ export class Tagger {
     // Tag Getters
     //
 
-    // getTagsForDocument will return an array of tags found in a given document
-    public getTagsForDocument(document: vscode.TextDocument): Tag[] {
+    // getTags will return an array of tags found for a given pattern and document
+    public getTags(pattern: Pattern, document?: vscode.TextDocument): Tag[] {
 
         // Init
         let tags: Tag[] = [];
@@ -123,26 +123,17 @@ export class Tagger {
         // Loop through the instance tags
         for (let tag of this.tags) {
 
-            // If the pattern name matches, add the tag to the array
-            if (tag.filepath === document.fileName) {
-                tags.push(tag);
+            // If there is a document
+            if (document) {
+
+                // If the pattern name and the document match the tag, add it to the array
+                if (tag.name === pattern.name && tag.filepath === document.fileName) {
+                    tags.push(tag);
+                }
             }
-        }
-
-        return tags;
-    }
-
-    // getTagsForPattern will return an array of tags found in a given pattern
-    public getTagsForPattern(pattern: Pattern): Tag[] {
-
-        // Init
-        let tags: Tag[] = [];
-
-        // Loop through the instance tags
-        for (let tag of this.tags) {
-
-            // If the pattern name matches, add the tag to the array
-            if (tag.name === pattern.name) {
+            
+            // If there is no document, but the pattern name matches the tag, add it to the array
+            else if (tag.name === pattern.name) {
                 tags.push(tag);
             }
         }
@@ -229,19 +220,21 @@ export class Tagger {
         log.Debug("Decorating editor...");
 
         // Init
+        let tags: Tag[];
+        let ranges: vscode.Range[];
         let editor = vscode.window.activeTextEditor;
         if (!editor || !editor.document) {
             return;
         }
-
-        // Get the tags for the current document
-        let tags = this.getTagsForDocument(editor.document);
         
         // Loop through the patterns
         for (let pattern of this.settings.patterns) {
 
             // Init
-            let ranges: vscode.Range[] = [];
+            ranges = [];
+
+            // Get the tags for the current document
+            tags = this.getTags(pattern, editor.document);
 
             // Loop through the tags
             for (let tag of tags) {
