@@ -21,6 +21,10 @@ export class Tagger {
     public tags: Tag[] = [];
     private decorationTypes: Map<string, vscode.TextEditorDecorationType> = new Map();
 
+    //
+    // Update Tags
+    //
+
     // updateTags will update the entire list of tags from scratch
     public async updateTags() {
 
@@ -45,7 +49,7 @@ export class Tagger {
             if (!fileUpdated) {
                 skipped++;
             }
-		}
+        }
 
 		log.Info(`Found ${this.tags.length} tag${this.tags.length === 1 ? "" : "s"} in ${files.length-skipped} files (skipped ${skipped} files)`);
     }
@@ -87,6 +91,10 @@ export class Tagger {
         log.Info(`- (+${added} -${removed} = ${added-removed}) Updated tags for file: '${document.fileName}'`);
     }
 
+    //
+    // Tag Getters
+    //
+
     // getTagsForDocument will return an array of tags found in a given document
     public getTagsForDocument(document: vscode.TextDocument): Tag[] {
 
@@ -122,6 +130,10 @@ export class Tagger {
 
         return tags;
     }
+
+    //
+    // Tag Helpers
+    //
 
     // removeTagsForDocument will remove all the tags for a given document
     private removeTagsForDocument(document: vscode.TextDocument): number {
