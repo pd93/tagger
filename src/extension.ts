@@ -22,18 +22,31 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.createTreeView('tagger-tags', { treeDataProvider: taggerTreeDataProvider });
 
     //
+    // Decorators
+    //
+
+    let decorationTypes = utils.createDecorationTypes(settings.patterns);
+
+    //
     // Functions
     //
 
+    // Refresh the decorations in the active editor
+    let refreshDecorations = () => {
+        console.log("--- updating decorations ---");
+        utils.decorate(settings.patterns, decorationTypes);
+    };
+
+    // Refresh the listed tags in the tagger tree view
+    let refreshTreeView = () => {
+        console.log("--- updating tree view ---");
+        taggerTreeDataProvider.refresh();
+    };
+
     // Refresh everything
     let refresh = () => {
-
-        console.log('#########################');
-        console.log('## ----- Refresh ----- ##');
-        console.log('#########################');
-
-        // Refresh the tree view
-        taggerTreeDataProvider.refresh();
+        refreshTreeView();
+        refreshDecorations();
     };
 
     //
@@ -56,6 +69,13 @@ export function activate(context: vscode.ExtensionContext) {
             refresh();
         }, null, context.subscriptions);
     }
+
+    // Listen for when the active editor changes
+    vscode.window.onDidChangeActiveTextEditor(editor => {
+        if (editor) {
+            refreshDecorations();
+        }
+    }, null, context.subscriptions);
 
     //
     // Commands

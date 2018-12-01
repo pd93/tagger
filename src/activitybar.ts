@@ -123,7 +123,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 				tags = map.get(pattern.name) || [];
 
 				// Join the existing entries with the new ones
-				tags.push(...utils.findTagsByPattern(pattern, document));
+				tags.push(...utils.findTags(pattern, document));
 		
 				// Set the map entry
 				map.set(pattern.name, tags);

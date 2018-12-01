@@ -21,8 +21,8 @@ export function getSettings(): structures.Settings {
     return settings;
 }
 
-// FindTagsByPattern will scan a given text document for matches to a single tag pattern
-export function findTagsByPattern(pattern: structures.Pattern, document: vscode.TextDocument): structures.Tag[] {
+// FindTags will scan a given text document for matches to a single tag pattern
+export function findTags(pattern: structures.Pattern, document: vscode.TextDocument): structures.Tag[] {
 
     console.log(`Finding tags for pattern: '${pattern.name}'...`);
 
@@ -54,20 +54,53 @@ export function findTagsByPattern(pattern: structures.Pattern, document: vscode.
     return tags;
 }
 
-// FindTags will scan a given text document for matches to all series of tag patterns
-export function findTags(patterns: structures.Pattern[], document: vscode.TextDocument): structures.Tag[] {
+export function createDecorationTypes(patterns: structures.Pattern[]): Map<string, vscode.TextEditorDecorationType> {
 
-    console.log("Finding tags...");
+    console.log("Creating decoration types...");
 
     // Init
-    let tags: structures.Tag[] = [];
+    let decorationTypes: Map<string, vscode.TextEditorDecorationType> = new Map();
 
-    // Loop through each tag
+    // Loop through the patterns and add the styles
     for (let pattern of patterns) {
-        tags.push(...findTagsByPattern(pattern, document));
+        decorationTypes.set(pattern.name, vscode.window.createTextEditorDecorationType(pattern.style));
     }
 
-    console.log(tags);
+    return decorationTypes;
+}
 
-    return tags;
+// Decorate will decorate the active text editor by highlighting tags
+export function decorate(patterns: structures.Pattern[], decorationTypes: Map<string, vscode.TextEditorDecorationType>) {
+    
+    console.log("Decorating editor...");
+
+    // Init
+    let editor = vscode.window.activeTextEditor;
+    if (!editor || !editor.document) {
+        return;
+    }
+    
+    // Loop through the patterns
+    for (let pattern of patterns) {
+
+        // Init
+        let ranges: vscode.Range[] = [];
+    
+        // Fetch the tags in the active editor
+        let tags = findTags(pattern, editor.document);
+
+        // Loop through the tags
+        for (let tag of tags) {
+            ranges.push(new vscode.Range(tag.start, tag.end));
+        }
+
+        // Get the decoration type
+        let decorationType = decorationTypes.get(pattern.name);
+        if (!decorationType) {
+            throw new Error(`No decoration type found for pattern: '${pattern.name}'`);
+        }
+
+        // Set the decorations
+        editor.setDecorations(decorationType, ranges);
+    }
 }
