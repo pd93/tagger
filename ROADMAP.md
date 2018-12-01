@@ -10,6 +10,8 @@
 
 ## v1.1.0
 
+- Default style
+- Pattern specific settings override
 - Tag Actions
 - Highlight tree items
 
