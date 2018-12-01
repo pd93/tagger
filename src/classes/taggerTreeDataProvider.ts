@@ -31,14 +31,16 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 	
 	// GetChildren ...
     public getChildren(parent?: TaggerTreeItem): Thenable<TaggerTreeItem[]> {
+		
+		// If there is a parent, then we need to return tags
+		if (parent && parent.pattern) {
+			
+			// Get a list of tags for the parent pattern
+			return Promise.resolve(this.getTagTreeItems(parent.pattern));
+		}
 
 		// If there's no parent, get a list of patterns
-		if (!parent) {
-			return Promise.resolve(this.getPatternTreeItems());
-		}
-		
-		// Otherwise, get a list of tags for the parent pattern
-		return Promise.resolve(this.getTagTreeItems(<Pattern>parent.pattern));
+		return Promise.resolve(this.getPatternTreeItems());
 	}
 
 	// GetPatternTreeItems returns a list of TaggerTreeItems containing patterns
@@ -69,19 +71,27 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 
 		// Init
 		let tagTreeItems: TaggerTreeItem[] = [];
+		let cmd: vscode.Command;
 
 		// Get the tags for this pattern
-		let tags = this.tagger.getTagsForPattern(pattern);
+		let tags = this.tagger.getTags(pattern);
 		
 		// Loop through the tags
 		for (let tag of tags) {
+
+			cmd = {
+				command: 'tagger.goToTag',
+				title: '',
+				arguments: [tag],
+			};
+
 			tagTreeItems.push(new TaggerTreeItem(
 				"tag",
-				`<span class="taggerTreeItem">${tag.text}</span>`,
-				// tag.text,
+				tag.text,
 				vscode.TreeItemCollapsibleState.None,
 				undefined,
-				tag
+				tag,
+				cmd
 			));
 		}
 		
