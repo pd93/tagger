@@ -6,3 +6,4 @@
 - Tag browser
 - Highlight tags
 - Alphabetical tag sorting
+- Go to tag
