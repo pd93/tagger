@@ -22,6 +22,17 @@ export class Tagger {
     private decorationTypes: Map<string, vscode.TextEditorDecorationType> = new Map();
 
     //
+    // Sort Tags
+    //
+
+    // sortTags will sort the tag array alphabetically
+    public sortTags() {
+        this.tags.sort((a: Tag, b: Tag) => {
+            return a.text > b.text ? 1 : (a.text < b.text ? -1 : 0);
+        });
+    }
+
+    //
     // Update Tags
     //
 
@@ -43,7 +54,7 @@ export class Tagger {
 		for (let file of files) {
 
             // Update the tags
-            let fileUpdated = await this.updateTagsForFile(file);
+            let fileUpdated = await this.updateTagsForFile(file, false);
 
             // If the file was skipped, increment the counter
             if (!fileUpdated) {
@@ -52,10 +63,13 @@ export class Tagger {
         }
 
 		log.Info(`Found ${this.tags.length} tag${this.tags.length === 1 ? "" : "s"} in ${files.length-skipped} files (skipped ${skipped} files)`);
+        
+        // Sort the tags
+        this.sortTags();
     }
 
     // updateTagsForFile will remove and re-add the tags for a given file
-    public async updateTagsForFile(file: vscode.Uri): Promise<boolean> {
+    public async updateTagsForFile(file: vscode.Uri, sort: boolean = true): Promise<boolean> {
 
         // Init
 		let document: vscode.TextDocument;
@@ -66,7 +80,7 @@ export class Tagger {
             document = await vscode.workspace.openTextDocument(file.fsPath);
 
             // Update the tags for the document
-            this.updateTagsForDocument(document);
+            this.updateTagsForDocument(document, sort);
 
         } catch (err) {
 
@@ -80,7 +94,7 @@ export class Tagger {
     }
 
     // updateTagsForDocument will remove and re-add the tags for given document
-    public updateTagsForDocument(document: vscode.TextDocument): void {
+    public updateTagsForDocument(document: vscode.TextDocument, sort: boolean = true): void {
 
         // Remove the existing tags
         let removed = this.removeTagsForDocument(document);
@@ -89,6 +103,11 @@ export class Tagger {
         let added = this.addTagsForDocument(document);
         
         log.Info(`- (+${added} -${removed} = ${added-removed}) Updated tags for file: '${document.fileName}'`);
+        
+        // Sort the tags
+        if (sort) {
+            this.sortTags();
+        }
     }
 
     //
