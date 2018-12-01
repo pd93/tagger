@@ -2,8 +2,8 @@
 
 import * as vscode from 'vscode';
 import * as log from './utils/log';
-import * as activitybar from './classes/activitybar';
 import { Tagger } from './classes/tagger';
+import { TaggerTreeDataProvider } from './classes/taggerTreeDataProvider'
 
 // Activate the extension
 export function activate(context: vscode.ExtensionContext) {
@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
     //
 
     // Create a tree data provider
-    const taggerTreeDataProvider = new activitybar.TaggerTreeDataProvider(tagger);
+    const taggerTreeDataProvider = new TaggerTreeDataProvider(tagger);
 
     // Register the tree view with its data provider
     vscode.window.createTreeView('tagger-tags', {
