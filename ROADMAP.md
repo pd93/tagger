@@ -11,6 +11,7 @@
 ## v1.1.0
 
 - Tag Actions
+- Highlight tree items
 
 ## v1.2.0
 
