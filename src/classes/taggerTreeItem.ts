@@ -39,8 +39,8 @@ export class TaggerTreeItem extends vscode.TreeItem {
 		// If the tree item is a 'tag', set the icon
 		if (type === "tag") {
 			this.iconPath = {
-				light: path.join(__filename, '..', '..', 'res', 'light', 'tag.svg'),
-				dark: path.join(__filename, '..', '..', 'res', 'dark', 'tag.svg')
+				light: path.join(__filename, '..', '..', '..', 'res', 'light', 'tag.svg'),
+				dark: path.join(__filename, '..', '..', '..', 'res', 'dark', 'tag.svg')
 			};
 		}
 	}

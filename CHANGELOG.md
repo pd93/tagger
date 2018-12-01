@@ -5,3 +5,4 @@
 - Regex pattern matching
 - Tag browser
 - Highlight tags
+- Alphabetical tag sorting
