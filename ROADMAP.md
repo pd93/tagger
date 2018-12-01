@@ -6,6 +6,7 @@
 - Tag browser
 - Highlight tags
 - Go to tag
+- Handle config changes
 - Travis CI
 
 ## v1.1.0

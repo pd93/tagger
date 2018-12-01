@@ -2,23 +2,34 @@
 
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
-import { Tagger, Pattern, TaggerTreeItem } from './';
+import { Pattern, TaggerTreeItem } from './';
+import { Tag } from './tag';
 
 // TaggerTreeDataProvide will provide data to the tag view in the tagger activity tab
 export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTreeItem> {
 
 	constructor(
-		private tagger: Tagger
+		private patterns: Pattern[],
+		private tagMap: Map<string, Tag[]> = new Map()
 	) {
-		log.Debug("Creating TagTreeDataProvider...");
+		log.Info("Creating TagTreeDataProvider...");
     }
 
 	// Variables
     private _onDidChangeTreeData: vscode.EventEmitter<TaggerTreeItem | undefined> = new vscode.EventEmitter<TaggerTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<TaggerTreeItem | undefined> = this._onDidChangeTreeData.event;
 
+    // setPatterns will set the patterns variable
+    public setPatterns(patterns: Pattern[]): void {
+        this.patterns = patterns;
+    }
+	
 	// Refresh will the refresh the tree view
-	public refresh(): void {
+	public refresh(tagMap: Map<string, Tag[]>): void {
+		
+		log.Info("--- refreshing tree view ---");
+		
+		this.tagMap = tagMap;
 		this._onDidChangeTreeData.fire();
 	}
 
@@ -41,6 +52,10 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 		return Promise.resolve(this.getPatternTreeItems());
 	}
 
+	//
+	// Helpers
+	//
+
 	// GetPatternTreeItems returns a list of TaggerTreeItems containing patterns
 	private getPatternTreeItems(): TaggerTreeItem[] {
 
@@ -50,7 +65,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 		let patternTreeItems: TaggerTreeItem[] = [];
 
 		// Loop through the patterns
-		for (let pattern of this.tagger.settings.patterns) {
+		for (let pattern of this.patterns) {
 			patternTreeItems.push(new TaggerTreeItem(
 				"pattern",
 				pattern.name.toUpperCase(),
@@ -70,12 +85,9 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 		// Init
 		let tagTreeItems: TaggerTreeItem[] = [];
 		let cmd: vscode.Command;
-
-		// Get the tags for this pattern
-		let tags = this.tagger.getTags(pattern);
 		
 		// Loop through the tags
-		for (let tag of tags) {
+		for (let tag of this.tagMap.get(pattern.name) || []) {
 
 			cmd = {
 				command: 'tagger.goToTag',

@@ -49,7 +49,7 @@ export class TaggerTreeItem extends vscode.TreeItem {
 		if (this.type === "pattern" && this.pattern) {
 			return `${this.pattern.regexp.source}`;
 		} else if (this.type === "tag" && this.tag) {
-			return `File: '${this.tag.filepath}' Line: ${this.tag.start.line + 1} Col: ${this.tag.start.character + 1}`;
+			return `File: '${this.tag.filepath}' Line: ${this.tag.start.line + 1}`;
 		} else {
 			return "";
 		}

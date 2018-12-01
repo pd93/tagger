@@ -2,268 +2,164 @@
 
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
-import { Pattern, Tag, Settings } from './';
+import { Tag, Tags, TaggerTreeDataProvider, Decorator, Settings } from './';
 
 export class Tagger {
 
-    constructor() {
+    constructor(
+        private context: vscode.ExtensionContext
+    ) {
 
-        log.Debug("Creating instance of Tagger");
+        log.Debug("Creating an instance of Tagger...");
 
+        // Get the tagger settings
         this.settings = new Settings();
-        this.setDecorationTypes();
+
+        // Register a decorator
+        this.registerDecorator(new Decorator(this.settings.patterns));
+
+        // Register a tree view
+        this.registerTreeDataProvider(new TaggerTreeDataProvider(this.settings.patterns));
+
+        // Register listeners
+        this.registerListeners();
+
+        // Register commands
+        this.registerCommands();
+
+        // Refresh everything
+        // this.refresh();
     }
 
     // Variables
     public settings: Settings;
-    public tags: Tag[] = [];
-    private decorationTypes: Map<string, vscode.TextEditorDecorationType> = new Map();
+    public tags: Tags = new Tags();
+    private taggerTreeDataProvider!: TaggerTreeDataProvider;
+    private decorator!: Decorator;
 
     //
-    // Sort Tags
+    // Registrars
     //
 
-    // sortTags will sort the tag array alphabetically
-    public sortTags() {
-        this.tags.sort((a: Tag, b: Tag) => {
-            return a.text > b.text ? 1 : (a.text < b.text ? -1 : 0);
+    // registerTreeDataProvider will register the tree view the tagger instance and vscode
+    public registerTreeDataProvider(taggerTreeDataProvider: TaggerTreeDataProvider): void {
+        
+        this.taggerTreeDataProvider = taggerTreeDataProvider;
+
+        // Register the tree view with its data provider
+        vscode.window.createTreeView('tagger-tags', {
+            treeDataProvider: this.taggerTreeDataProvider
         });
     }
 
-    //
-    // Update Tags
-    //
+    // registerDecorator will register the decorator with the tagger instance
+    public registerDecorator(decorator: Decorator): void {
+        this.decorator = decorator;
+    }
 
-    // updateTags will update the entire list of tags from scratch
-    public async updateTags() {
+    public registerListeners(): void {      
 
-        log.Debug("Updating tags...");
+        switch (this.settings.updateOn) {
 
-		// Init
-		this.tags = [];
-		let skipped: number = 0;
+            // Listen to document change events
+            case "change":
 
-		// Get a list of files in the workspace
-		let files = await vscode.workspace.findFiles(this.settings.include, this.settings.exclude);
+                vscode.workspace.onDidChangeTextDocument(event => {
 
-		log.Info(`Found ${files.length} file${files.length === 1 ? "" : "s"} in the workspace`);
+                    // Update tags for the file that changed
+                    this.tags.updateForDocument(this.settings.patterns, event.document);
 
-		// Loop through the files
-		for (let file of files) {
+                    // Refresh the tree view
+                    this.refreshTreeView();
 
-            // Update the tags
-            let fileUpdated = await this.updateTagsForFile(file, false);
+                    // If the file tht changed is currently open, update the decorations too
+                    if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
+                        this.refreshDecorations();
+                    }
 
-            // If the file was skipped, increment the counter
-            if (!fileUpdated) {
-                skipped++;
+                }, null, this.context.subscriptions);
+
+                break;
+
+            // Listen to save document events
+            case "save":
+
+                vscode.workspace.onDidSaveTextDocument(event => {
+
+                    // Update tags for the file that changed
+                    this.tags.updateForFile(this.settings.patterns, event.uri);
+
+                    // Refresh the tree view
+                    this.refreshTreeView();
+
+                    // If the file tht changed is currently open, update the decorations too
+                    if (vscode.window.activeTextEditor && event.fileName === vscode.window.activeTextEditor.document.fileName) {
+                        this.refreshDecorations();
+                    }
+
+                }, null, this.context.subscriptions);
+                break;
+        }
+
+        // Listen for when the active editor changes
+        vscode.window.onDidChangeActiveTextEditor(editor => {
+
+            // If the editor is active, refresh the decorations
+            if (editor) {
+                this.refreshDecorations();
             }
-        }
 
-		log.Info(`Found ${this.tags.length} tag${this.tags.length === 1 ? "" : "s"} in ${files.length-skipped} files (skipped ${skipped} files)`);
+        }, null, this.context.subscriptions);
+    }
+
+    public registerCommands(): void {
         
-        // Sort the tags
-        this.sortTags();
+        // Refresh everything
+        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refresh', () => {
+            this.refresh();
+        }));
+        
+        // Navigate to a tag
+        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.goToTag', (tag: Tag) => {
+            tag.go();
+        }));
     }
-
-    // updateTagsForFile will remove and re-add the tags for a given file
-    public async updateTagsForFile(file: vscode.Uri, sort: boolean = true): Promise<boolean> {
-
-        // Init
-		let document: vscode.TextDocument;
-
-        try {
-
-            // Get the file as a TextDocument
-            document = await vscode.workspace.openTextDocument(file.fsPath);
-
-            // Update the tags for the document
-            this.updateTagsForDocument(document, sort);
-
-        } catch (err) {
-
-            // If there's a problem reading the file, skip it and return false
-            log.Info(`- Skipping file: '${file.fsPath}'...`);
-
-            return false;
-        }
-
-        return true;
-    }
-
-    // updateTagsForDocument will remove and re-add the tags for given document
-    public updateTagsForDocument(document: vscode.TextDocument, sort: boolean = true): void {
-
-        // Remove the existing tags
-        let removed = this.removeTagsForDocument(document);
     
-        // Add the new tags
-        let added = this.addTagsForDocument(document);
+    //
+    // Refresh
+    //
+
+    // refreshTreeView will populate the tree view using the latest tags
+    public refreshTreeView() {
+        this.taggerTreeDataProvider.refresh(this.tags.getTagsAsMap(this.settings.patterns));
+    }
+
+    // refreshDecorations will decorate the active text editor using the latest tags
+    public refreshDecorations(): void {
         
-        log.Info(`- (+${added} -${removed} = ${added-removed}) Updated tags for file: '${document.fileName}'`);
-        
-        // Sort the tags
-        if (sort) {
-            this.sortTags();
-        }
-    }
-
-    //
-    // Tag Getters
-    //
-
-    // getTags will return an array of tags found for a given pattern and document
-    public getTags(pattern: Pattern, document?: vscode.TextDocument): Tag[] {
-
-        // Init
-        let tags: Tag[] = [];
-
-        // Loop through the instance tags
-        for (let tag of this.tags) {
-
-            // If there is a document
-            if (document) {
-
-                // If the pattern name and the document match the tag, add it to the array
-                if (tag.name === pattern.name && tag.filepath === document.fileName) {
-                    tags.push(tag);
-                }
-            }
-            
-            // If there is no document, but the pattern name matches the tag, add it to the array
-            else if (tag.name === pattern.name) {
-                tags.push(tag);
-            }
-        }
-
-        return tags;
-    }
-
-    //
-    // Go To Tag
-    //
-
-    // goToTag will open a tag in the editor
-    public goToTag(tag: Tag): void {
-
-        let options: vscode.TextDocumentShowOptions = {
-            selection: new vscode.Range(tag.end, tag.end)
-        };
-
-        log.Info(`--- jumping to tag in file: '${tag.filepath}' at line: ${tag.start.line} ---`);
-        vscode.commands.executeCommand('vscode.open', vscode.Uri.file(tag.filepath), options);
-    }
-
-    //
-    // Tag Helpers
-    //
-
-    // removeTagsForDocument will remove all the tags for a given document
-    private removeTagsForDocument(document: vscode.TextDocument): number {
-
-        // Init
-        let tags: Tag[] = [];
-        let count: number = 0;
-
-        // Loop through the instance tags
-        for (let tag of this.tags) {
-
-            // If the filepath doesn't match, add the tag to the array
-            if (tag.filepath === document.fileName) {
-                count++;
-            } else {
-                tags.push(tag);
-            }
-        }
-        
-        // Update the instance tags
-        this.tags = tags;
-
-        return count;
-    }
-
-    // addTagsForDocument will add all the tags for a given document
-    private addTagsForDocument(document: vscode.TextDocument): number {
-
-        // Init
-        let count: number = 0;
-        let match: RegExpExecArray | null;
-        
-        // Loop through the patterns
-        for (let pattern of this.settings.patterns) {
-
-            // Loop through all the matches and add them to an array
-            while (match = pattern.regexp.exec(document.getText())) {
-                this.tags.push(new Tag(
-                    pattern.name,
-                    match[0],
-                    document.uri.fsPath,
-                    document.positionAt(match.index),
-                    document.positionAt(match.index + match[0].length)
-                ));
-
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    //
-    // Decorations
-    //
-
-    // setDecorationTypes will create a decoration for each pattern
-    public setDecorationTypes(): void {
-
-        log.Debug("Creating decoration types...");
-
-        // Init
-        this.decorationTypes = new Map();
-    
-        // Loop through the patterns and add the styles
-        for (let pattern of this.settings.patterns) {
-            this.decorationTypes.set(pattern.name, vscode.window.createTextEditorDecorationType(pattern.style));
-        }
-    }
-
-    // decorate will decorate the active text editor by highlighting tags
-    public decorate(): void {
-        
-        log.Debug("Decorating editor...");
-
-        // Init
-        let tags: Tag[];
-        let ranges: vscode.Range[];
+        // Ensure there is an active editor
         let editor = vscode.window.activeTextEditor;
         if (!editor || !editor.document) {
             return;
         }
-        
-        // Loop through the patterns
-        for (let pattern of this.settings.patterns) {
 
-            // Init
-            ranges = [];
+        this.decorator.refresh(this.tags.getTagsAsMap(this.settings.patterns, editor.document));
+    }
+    
+    // refresh will perform a full update of all tags and refresh the tree view and decorations
+    public async refresh(): Promise<void> {
 
-            // Get the tags for the current document
-            tags = this.getTags(pattern, editor.document);
+        try {
 
-            // Loop through the tags
-            for (let tag of tags) {
-                ranges.push(new vscode.Range(tag.start, tag.end));
-            }
+            // Update all the tags
+            await this.tags.update(this.settings.patterns, this.settings.include, this.settings.exclude);
+            
+            // Refresh the tree view and decorations
+            this.refreshTreeView();
+            this.refreshDecorations();
 
-            // Get the decoration type
-            let decorationType = this.decorationTypes.get(pattern.name);
-            if (!decorationType) {
-                throw new Error(`No decoration type found for pattern: '${pattern.name}'`);
-            }
-
-            // Set the decorations
-            editor.setDecorations(decorationType, ranges);
-
-            // TODO: Set the scroll bar markers
+        } catch (err) {
+            console.log(err);
         }
     }
 }
