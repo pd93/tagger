@@ -142,6 +142,21 @@ export class Tagger {
     }
 
     //
+    // Go To Tag
+    //
+
+    // goToTag will open a tag in the editor
+    public goToTag(tag: Tag): void {
+
+        let options: vscode.TextDocumentShowOptions = {
+            selection: new vscode.Range(tag.end, tag.end)
+        };
+
+        log.Info(`--- jumping to tag in file: '${tag.filepath}' at line: ${tag.start.line} ---`);
+        vscode.commands.executeCommand('vscode.open', vscode.Uri.file(tag.filepath), options);
+    }
+
+    //
     // Tag Helpers
     //
 
