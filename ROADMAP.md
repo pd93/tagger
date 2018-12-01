@@ -4,14 +4,18 @@
 
 - Regex pattern matching
 - Tag browser
-- Capture groups
 - Highlight tags
+- Go to tag
 - Travis CI
 
 ## v1.1.0
 
 - Tag Actions
-- Language agnostic comment recognition
+
+## v1.2.0
+
+- Search
+- Sorting Options
 
 ---
 
