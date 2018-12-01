@@ -1,3 +1,5 @@
+'use strict';
+
 export { Pattern } from './pattern';
 export { Settings } from './settings';
 export { Tag } from './tag';
