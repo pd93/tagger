@@ -1,8 +1,8 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as log from './log';
-import { Tag, Pattern } from './interfaces';
+import * as log from '../utils/log';
+import { Tag, Pattern } from '../interfaces';
 import { Settings } from './settings';
 
 export class Tagger {

@@ -1,9 +1,9 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as activitybar from './activitybar';
-import * as log from './log';
-import { Tagger } from './tagger';
+import * as log from './utils/log';
+import * as activitybar from './classes/activitybar';
+import { Tagger } from './classes/tagger';
 
 // Activate the extension
 export function activate(context: vscode.ExtensionContext) {

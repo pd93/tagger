@@ -2,8 +2,8 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as log from './log';
-import { Tag, Pattern } from './interfaces';
+import * as log from '../utils/log';
+import { Tag, Pattern } from '../interfaces';
 import { Tagger } from './tagger';
 
 // TaggerTreeItem corresponds to a single tag item listed in the TagTree
