@@ -3,10 +3,9 @@
 ## v1.0.0
 
 - Regex pattern matching
-- Capture groups
 - Tag browser
-- Go to tag
 - Highlight tags
+- Go to tag
 - Travis CI
 
 ## v1.1.0
@@ -16,6 +15,7 @@
 ## v1.2.0
 
 - Search
+- Sorting Options
 
 ---
 

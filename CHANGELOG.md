@@ -3,3 +3,5 @@
 ## 1.0.0
 
 - Regex pattern matching
+- Tag browser
+- Highlight tags
