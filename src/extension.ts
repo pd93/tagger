@@ -2,30 +2,26 @@
 
 import * as vscode from 'vscode';
 import * as activitybar from './activitybar';
-import * as structures from './structures';
-import * as utils from './utils';
+import * as log from './log';
+import { Tagger } from './tagger';
 
 // Activate the extension
 export function activate(context: vscode.ExtensionContext) {
-    
-    // Fetch the tagger settings from the user's config
-    var settings: structures.Settings = utils.getSettings();
+
+    // Create a new instance of Tagger
+    var tagger: Tagger = new Tagger();
 
     //
     // Trees
     //
 
     // Create a tree data provider
-    const taggerTreeDataProvider = new activitybar.TaggerTreeDataProvider(settings.patterns, settings.include, settings.exclude, settings.maxResults);
+    const taggerTreeDataProvider = new activitybar.TaggerTreeDataProvider(tagger);
 
     // Register the tree view with its data provider
-    vscode.window.createTreeView('tagger-tags', { treeDataProvider: taggerTreeDataProvider });
-
-    //
-    // Decorators
-    //
-
-    let decorationTypes = utils.createDecorationTypes(settings.patterns);
+    vscode.window.createTreeView('tagger-tags', {
+        treeDataProvider: taggerTreeDataProvider
+    });
 
     //
     // Functions
@@ -33,18 +29,23 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Refresh the decorations in the active editor
     let refreshDecorations = () => {
-        console.log("--- updating decorations ---");
-        utils.decorate(settings.patterns, decorationTypes);
+        log.Info("--- updating decorations ---");
+        tagger.decorate();
     };
 
     // Refresh the listed tags in the tagger tree view
     let refreshTreeView = () => {
-        console.log("--- updating tree view ---");
+        log.Info("--- updating tree view ---");
         taggerTreeDataProvider.refresh();
     };
 
     // Refresh everything
-    let refresh = () => {
+    let refresh = async () => {
+
+        // Update all the tags
+        await tagger.updateTags();
+
+        // Update the tree view and decorations
         refreshTreeView();
         refreshDecorations();
     };
@@ -53,28 +54,56 @@ export function activate(context: vscode.ExtensionContext) {
     // Listeners
     //
 
-    if (settings.updateOn === "change") {
+    switch (tagger.settings.updateOn) {
 
         // Listen to document change events
-        vscode.workspace.onDidChangeTextDocument(event => {
-            if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
-                refresh();
-            }
-        }, null, context.subscriptions);
+        case "change":
 
-    } else if (settings.updateOn === "save") {
+            vscode.workspace.onDidChangeTextDocument(event => {
+
+                // Update tags for the file that changed
+                tagger.updateTagsForDocument(event.document);
+
+                // Refresh the tree view
+                refreshTreeView();
+
+                // If the file tht changed is currently open, update the decorations too
+                if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
+                    refreshDecorations();
+                }
+
+            }, null, context.subscriptions);
+
+            break;
 
         // Listen to save document events
-        vscode.workspace.onDidSaveTextDocument(event => {
-            refresh();
-        }, null, context.subscriptions);
+        case "save":
+
+            vscode.workspace.onDidSaveTextDocument(event => {
+
+                // Update tags for the file that changed
+                tagger.updateTagsForFile(event.uri);
+
+                // Refresh the tree view
+                refreshTreeView();
+
+                // If the file tht changed is currently open, update the decorations too
+                if (vscode.window.activeTextEditor && event.fileName === vscode.window.activeTextEditor.document.fileName) {
+                    refreshDecorations();
+                }
+
+            }, null, context.subscriptions);
+            break;
     }
 
     // Listen for when the active editor changes
     vscode.window.onDidChangeActiveTextEditor(editor => {
+
+        // If the editor is active, refresh the decorations
         if (editor) {
             refreshDecorations();
         }
+
     }, null, context.subscriptions);
 
     //

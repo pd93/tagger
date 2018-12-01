@@ -1,9 +1,10 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as utils from './utils';
-import * as structures from './structures';
 import * as path from 'path';
+import * as log from './log';
+import { Tag, Pattern } from './interfaces';
+import { Tagger } from './tagger';
 
 // TaggerTreeItem corresponds to a single tag item listed in the TagTree
 export class TaggerTreeItem extends vscode.TreeItem {
@@ -12,13 +13,13 @@ export class TaggerTreeItem extends vscode.TreeItem {
 		public readonly type: string,
 		public readonly label: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-		public readonly pattern?: structures.Pattern,
-		public readonly tag?: structures.Tag,
+		public readonly pattern?: Pattern,
+		public readonly tag?: Tag,
 		public readonly command?: vscode.Command
 	) {
 		super(label, collapsibleState);
 
-		console.log(`- Creating TaggerTreeItem of type '${this.type}'...`);
+		log.Debug(`- Creating TaggerTreeItem of type '${this.type}'...`);
 
 		// Ensure type is valid
 		if (type !== "tag" && type !== "pattern") {
@@ -60,22 +61,17 @@ export class TaggerTreeItem extends vscode.TreeItem {
 export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTreeItem> {
 
 	constructor(
-		private patterns: structures.Pattern[],
-		private include: string,
-		private exclude: string,
-		private maxResults: number
+		private tagger: Tagger
 	) {
-		console.log("Creating TagTreeDataProvider...");
+		log.Debug("Creating TagTreeDataProvider...");
     }
 
 	// Variables
     private _onDidChangeTreeData: vscode.EventEmitter<TaggerTreeItem | undefined> = new vscode.EventEmitter<TaggerTreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<TaggerTreeItem | undefined> = this._onDidChangeTreeData.event;
-	private tags: Map<string, structures.Tag[]> = new Map();
 
 	// Refresh will the refresh the tree view
-	public async refresh(): Promise<void> {
-		await this.updateTags();
+	public refresh(): void {
 		this._onDidChangeTreeData.fire();
 	}
 
@@ -93,56 +89,19 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 		}
 		
 		// Otherwise, get a list of tags for the parent pattern
-		return Promise.resolve(this.getTagTreeItems(<structures.Pattern>parent.pattern));
+		return Promise.resolve(this.getTagTreeItems(<Pattern>parent.pattern));
 	}
 
-	// UpdateTags will loop through the workspace files and patterns and place the resulting tags in a map
-	public async updateTags() {
-
-		console.log('Updating tree view tags...');
-
-		// Init
-		let map: Map<string, structures.Tag[]> = new Map();
-		let tags: structures.Tag[] | undefined;
-
-		// Get a list of files in the workspace
-		let files = await vscode.workspace.findFiles(this.include, this.exclude, this.maxResults);
-
-		// Loop through the files
-		for (let file of files) {
-
-			console.log(`- Scanning file: '${file.fsPath}'`);
-
-			// Get the file as a TextDocument
-			let document = await vscode.workspace.openTextDocument(file.fsPath);
-			
-			// Loop through the patterns
-			for (let pattern of this.patterns) {
-
-				// Check for existing entries
-				tags = map.get(pattern.name) || [];
-
-				// Join the existing entries with the new ones
-				tags.push(...utils.findTags(pattern, document));
-		
-				// Set the map entry
-				map.set(pattern.name, tags);
-			}
-		}
-
-		this.tags = map;
-	}
-	
 	// GetPatternTreeItems returns a list of TaggerTreeItems containing patterns
 	private getPatternTreeItems(): TaggerTreeItem[] {
 
-		console.log("Getting patterns as TreeItems...");
+		log.Debug("Getting patterns as TreeItems...");
 
 		// Init
 		let patternTreeItems: TaggerTreeItem[] = [];
 
 		// Loop through the patterns
-		for (let pattern of this.patterns) {
+		for (let pattern of this.tagger.settings.patterns) {
 			patternTreeItems.push(new TaggerTreeItem(
 				"pattern",
 				pattern.name.toUpperCase(),
@@ -155,24 +114,22 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 	}
 
 	// GetTagTreeItems returns a list of TaggerTreeItems containing tags for a parent pattern
-    private getTagTreeItems(pattern: structures.Pattern): TaggerTreeItem[] {
+    private getTagTreeItems(pattern: Pattern): TaggerTreeItem[] {
 
-		console.log(`Getting tags as TreeItems for pattern: '${pattern.name}'...`);
+		log.Debug(`Getting tags as TreeItems for pattern: '${pattern.name}'...`);
 
 		// Init
 		let tagTreeItems: TaggerTreeItem[] = [];
 
 		// Get the tags for this pattern
-		let tags = this.tags.get(pattern.name);
-		if (!tags) {
-			return [];
-		}
-
+		let tags = this.tagger.getTagsForPattern(pattern);
+		
 		// Loop through the tags
 		for (let tag of tags) {
 			tagTreeItems.push(new TaggerTreeItem(
 				"tag",
-				tag.text,
+				`<span class="taggerTreeItem">${tag.text}</span>`,
+				// tag.text,
 				vscode.TreeItemCollapsibleState.None,
 				undefined,
 				tag
