@@ -10,7 +10,7 @@ export class Tagger {
         private context: vscode.ExtensionContext
     ) {
 
-        log.Debug("Creating an instance of Tagger...");
+        log.Info("Creating an instance of Tagger...");
 
         // Get the tagger settings
         this.settings = new Settings();
@@ -110,6 +110,24 @@ export class Tagger {
             }
 
         }, null, this.context.subscriptions);
+
+        // Listen for configuration changes
+        vscode.workspace.onDidChangeConfiguration(event => {
+            
+            // If a change was made to the tagger config
+            if (event.affectsConfiguration("tagger")) {
+
+                // Update the settings
+                this.settings.update();
+
+                // Send the new patterns to the decorator and tree view
+                this.decorator.setPatterns(this.settings.patterns);
+                this.taggerTreeDataProvider.setPatterns(this.settings.patterns);
+
+                // Refresh everything
+                this.refresh();
+            }
+        });
     }
 
     public registerCommands(): void {

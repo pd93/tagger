@@ -1,19 +1,15 @@
 'use strict';
 
-export interface Pattern {
-    name: string;
-    pattern: string;
-    caseSensitive: boolean;
-    style: Style;
-}
+import * as vscode from 'vscode';
 
-export interface Style {
-    color: string;
-    backgroundColor: string;
-    underline: boolean;
-    bold: boolean;
-    emphasis: boolean;
-}
+// export interface Pattern {
+//     name: string;
+//     pattern: string;
+//     include: string;
+//     exclude: string;
+//     caseSensitive: boolean;
+//     decoration: vscode.TextEditorDecorationType;
+// }
 
 export class Pattern {
 
@@ -21,7 +17,7 @@ export class Pattern {
         public name: string,
         pattern: string,
         caseSensitive: boolean,
-        public style: Style
+        style: vscode.DecorationRenderOptions
     ) {
         // Create a new RegExp object
         if (caseSensitive) {
@@ -29,7 +25,11 @@ export class Pattern {
         } else {
             this.regexp = new RegExp(pattern, 'gi');
         }
+
+        // Create the TextEditorDecorationType
+        this.textEditorDecorationType = vscode.window.createTextEditorDecorationType(style);
     }
 
     public regexp: RegExp;
+    public textEditorDecorationType: vscode.TextEditorDecorationType;
 }

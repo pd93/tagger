@@ -4,29 +4,42 @@ A VSCode extension to view, highlight and manage in-code tags.
 
 ## Settings
 
-Below, is an example of a tagger configuration. This example will tag any text (starting with or without a comment) with the case-sensitive term `TODO:` followed by a string. It will search in all (non-binary) files in the workspace except for the `node_modules` folder. All the tags found will then be highlighted with a red background and white text.
+In the example configuration below, the `todo` pattern will tag any text (starting with or without a comment) with the case-sensitive term `TODO:` followed by a string. Tagger will search in all (non-binary) files in the workspace (except for the `node_modules` folder) and all the found `todo` tags will be highlighted with a red background and white text.
 
-You may define as many patterns as you like and each pattern has its own style. Default styles and pattern specific include/exclude rules are not currently available, but are coming in a future release!
+You may define as many patterns as you like, but each pattern **must** contain a name and a pattern string (regular expression). The default style and properties will be applied to all tags unless they are overriden. An example of this can be seen in the `note` pattern below which overrides the default `caseSensitive` and `style` properties.
 
 ```json
 {
     "tagger": {
         "updateOn": "change",
-        "include": "",
+        "include": "**/*",
         "exclude": "**/node_modules/*",
+        "defaultPattern": {
+            "caseSensitive": true,
+            "style": {
+                "color": "#FFF",
+                "backgroundColor": "#CF3F61",
+                "overviewRulerColor": "#CF3F61",
+                // ...
+            }
+        },
         "patterns": [
             {   
                 "name": "todo",
-                "pattern": "(\\/\\/|#|\\/\\*)? TODO: .*",
-                "caseSensitive": true,
+                "pattern": "(\\/\\/|#|\\/\\*)? TODO: .*"
+            },
+            {   
+                "name": "note",
+                "pattern": "(\\/\\/|#|\\/\\*)? NOTE: .*",
+                "caseSensitive": false,
                 "style": {
                     "color": "#FFF",
-                    "backgroundColor": "#CF3F61",
-                    "overviewRulerColor": "#CF3F61",
-                    ...
+                    "backgroundColor": "#4C9AD4",
+                    "overviewRulerColor": "#4C9AD4",
+                    // ...
                 }
             },
-            ...
+            // ...
         ]
     }
 }

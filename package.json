@@ -42,12 +42,13 @@
             "properties": {
                 "tagger": {
                     "type": "object",
-                    "description": "Configuration options for Tagger",
+                    "description": "Tagger configuration options.",
                     "properties": {
                         "updateOn": {
                             "type": "string",
+                            "enum": ["change", "save"],
                             "default": "change",
-                            "description": "When should tagger update the tags [change|save]."
+                            "description": "Whether tagger should update tags when a file is changed or when it is saved."
                         },
                         "include": {
                             "type": "string",
@@ -59,12 +60,69 @@
                             "default": "**/node_modules/*",
                             "description": "Glob pattern for files to exclude when searching for tags."
                         },
+                        "defaultPattern": {
+                            "type": "object",
+                            "description": "Default tag settings.",
+                            "properties": {
+                                "caseSensitive": {
+                                    "type": "boolean",
+                                    "default": true,
+                                    "description": "Whether or not the tag will be matched with case sensitivity."
+                                },
+                                "style": {
+                                    "type": "object",
+                                    "description": "The decorations you would like your tags to have.",
+                                    "properties": {
+                                        "backgroundColor": {
+                                            "type": "string"
+                                        },
+                                        "border": {
+                                            "type": "string"
+                                        },
+                                        "borderColor": {
+                                            "type": "string"
+                                        },
+                                        "borderRadius": {
+                                            "type": "string"
+                                        },
+                                        "borderSpacing": {
+                                            "type": "string"
+                                        },
+                                        "borderStyle": {
+                                            "type": "string"
+                                        },
+                                        "borderWidth": {
+                                            "type": "string"
+                                        },
+                                        "color": {
+                                            "type": "string"
+                                        },
+                                        "fontStyle": {
+                                            "type": "string"
+                                        },
+                                        "fontWeight": {
+                                            "type": "string"
+                                        },
+                                        "opacity": {
+                                            "type": "string"
+                                        },
+                                        "overviewRulerColor": {
+                                            "type": "string"
+                                        },
+                                        "textDecoration": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
                         "patterns": {
                             "type": "array",
                             "default": [],
                             "description": "An array of patterns to match tags with.",
                             "items": {
                                 "type": "object",
+                                "required": ["name", "pattern"],
                                 "properties": {
                                     "name": {
                                         "type": "string",
@@ -76,11 +134,11 @@
                                     },
                                     "caseSensitive": {
                                         "type": "boolean",
-                                        "description": "Whether or not the tag will be matched with case sensitivity."
+                                        "description": "Whether or not the tag will be matched with case sensitivity (overrides default)."
                                     },
                                     "style": {
                                         "type": "object",
-                                        "description": "The decorations you would like your tags to have.",
+                                        "description": "The decorations you would like your tag to have (overrides default).",
                                         "properties": {
                                             "backgroundColor": {
                                                 "type": "string"

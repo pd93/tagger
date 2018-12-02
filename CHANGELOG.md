@@ -7,3 +7,6 @@
 - Highlight tags
 - Alphabetical tag sorting
 - Go to tag
+- Handle config changes
+- Default style in settings
+- Pattern specific settings override

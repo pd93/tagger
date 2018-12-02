@@ -10,18 +10,11 @@ export class Decorator {
         private patterns: Pattern[]
     ) {
         log.Info("Creating Decorator...");
-        
-        // Set the decoration types
-        this.updateDecorationTypes();
     }
-
-    // Variables
-    private decorationTypes: Map<string, vscode.TextEditorDecorationType> = new Map();
 
     // setPatterns will set the patterns variable
     public setPatterns(patterns: Pattern[]): void {
         this.patterns = patterns;
-        this.updateDecorationTypes();
     }
 
     // refresh will decorate the active text editor by highlighting tags
@@ -47,32 +40,8 @@ export class Decorator {
                 ranges.push(new vscode.Range(tag.start, tag.end));
             }
 
-            // Get the decoration type
-            let decorationType = this.decorationTypes.get(pattern.name);
-            if (!decorationType) {
-                throw new Error(`No decoration type found for pattern: '${pattern.name}'`);
-            }
-
             // Set the decorations
-            editor.setDecorations(decorationType, ranges);
-        }
-    }
-
-    //
-    // Helpers
-    //
-
-    // updateDecorationTypes will update the decorations for each pattern
-    private updateDecorationTypes(): void {
-
-        log.Info("Creating decoration types...");
-
-        // Init
-        this.decorationTypes = new Map();
-    
-        // Loop through the patterns and add the styles
-        for (let pattern of this.patterns) {
-            this.decorationTypes.set(pattern.name, vscode.window.createTextEditorDecorationType(pattern.style));
+            editor.setDecorations(pattern.textEditorDecorationType, ranges);
         }
     }
 }

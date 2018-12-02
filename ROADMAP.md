@@ -7,12 +7,12 @@
 - Highlight tags
 - Go to tag
 - Handle config changes
+- Default style
+- Pattern specific settings override
 - Travis CI
 
 ## v1.1.0
 
-- Default style
-- Pattern specific settings override
 - Tag Actions
 - Highlight tree items
 
