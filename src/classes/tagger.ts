@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
 import { Tag, Tags, TaggerTreeDataProvider, Decorator, Settings } from './';
+import { TaggerTreeItem } from './taggerTreeItem';
 
 export class Tagger {
 
@@ -131,6 +132,16 @@ export class Tagger {
     }
 
     public registerCommands(): void {
+
+        // Refresh tree view
+        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshTreeView', () => {
+            this.refreshTreeView();
+        }));
+        
+        // Refresh decorations
+        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshDecorations', () => {
+            this.refreshDecorations();
+        }));
         
         // Refresh everything
         this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refresh', () => {
@@ -138,13 +149,18 @@ export class Tagger {
         }));
         
         // Navigate to a tag
-        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.goToTag', (tag: Tag) => {
-            tag.go();
+        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.goToTag', (tag?: Tag) => {
+            this.goToTag(tag);
+        }));
+        
+        // Delete a tag
+        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.deleteTag', (taggerTreeItem?: TaggerTreeItem) => {
+            this.deleteTag(taggerTreeItem);
         }));
     }
     
     //
-    // Refresh
+    // Commands
     //
 
     // refreshTreeView will populate the tree view using the latest tags
@@ -178,6 +194,82 @@ export class Tagger {
 
         } catch (err) {
             console.log(err);
+        }
+    }
+
+    // goToTag will navigate to the provided tag or show a quick pick to select a tag to navigate to
+    public goToTag(tag?: Tag): void {
+
+        // Tag parsed in
+        if (tag) {
+            tag.go();
+        }
+
+        // Display a list of tags to navigate to
+        else {   
+
+            try {
+
+                // Get the items
+                let items: vscode.QuickPickItem[] = [];
+                for (let [index, tag] of this.tags.entries()) {
+                    items.push({
+                        description: tag.tooltip(),
+                        label: `${index}: ${tag.text}`
+                    });
+                }
+                
+                // Show the quick pick menu
+                vscode.window.showQuickPick(items).then(selection => {
+                    if (selection) {
+                        let id = parseInt(selection.label.substring(0, selection.label.indexOf(":")));
+                        this.tags[id].go();
+                    }
+                });
+
+            } catch (err) {
+                console.log(err);
+            }
+        }
+    }
+    
+    // deleteTag will remove the provided tag from the code or show a quick pick to select a tag to delete
+    public async deleteTag(taggerTreeItem?: TaggerTreeItem): Promise<void> {
+
+        // Tag parsed in 
+        if (taggerTreeItem && taggerTreeItem.tag) {        
+            try {
+                await taggerTreeItem.tag.delete();
+            } catch (err) {
+                console.log(err);
+            }
+        }
+
+        // Display a list of tags to delete
+        else {
+
+            try {
+
+                // Get the items
+                let items: vscode.QuickPickItem[] = [];
+                for (let [index, tag] of this.tags.entries()) {
+                    items.push({
+                        description: tag.tooltip(),
+                        label: `${index}: ${tag.text}`
+                    });
+                }
+                
+                // Show the quick pick menu
+                vscode.window.showQuickPick(items).then(selection => {
+                    if (selection) {
+                        let id = parseInt(selection.label.substring(0, selection.label.indexOf(":")));
+                        this.tags[id].delete();
+                    }
+                });
+
+            } catch (err) {
+                console.log(err);
+            }
         }
     }
 }

@@ -21,35 +21,41 @@ export class TaggerTreeItem extends vscode.TreeItem {
 		log.Debug(`- Creating TaggerTreeItem of type '${this.type}'...`);
 
 		// Ensure type is valid
-		if (type !== "tag" && type !== "pattern") {
+		if (this.type !== "tag" && this.type !== "pattern") {
 			throw new Error("Type must be 'pattern' or 'tag'");				
 		}
 
 		// Ensure that if the type is 'pattern', a pattern is set
-		if (type === "pattern" && !this.pattern) {
+		if (this.type === "pattern" && !this.pattern) {
 			throw new Error("No pattern given for TaggerTreeItem with type: 'pattern'");
 		}
 		
 		// Ensure that if the type is 'tag', a tag is set
-		if (type === "tag" && !this.tag) {
+		if (this.type === "tag" && !this.tag) {
 			throw new Error("No tag given for TaggerTreeItem with type: 'tag'");
 		}
 		
 		// If the tree item is a 'tag', set the icon
-		if (type === "tag") {
+		if (this.type === "tag") {
 			this.iconPath = {
 				light: path.join(__filename, '..', '..', '..', 'res', 'light', 'tag.svg'),
 				dark: path.join(__filename, '..', '..', '..', 'res', 'dark', 'tag.svg')
 			};
 		}
+
+		// Set the context value
+		this.contextValue = `${this.type}TreeItem`;
 	}
+
+	// Variables
+	public contextValue: string;
 
 	// Tooltip will return a string to be displayed when hovering over the tree item
     get tooltip(): string {
 		if (this.type === "pattern" && this.pattern) {
 			return `${this.pattern.regexp.source}`;
 		} else if (this.type === "tag" && this.tag) {
-			return `File: '${this.tag.filepath}' Line: ${this.tag.start.line + 1}`;
+			return this.tag.tooltip();
 		} else {
 			return "";
 		}

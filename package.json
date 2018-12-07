@@ -16,8 +16,36 @@
     "contributes": {
         "commands": [
             {
+                "command": "tagger.refreshTreeView",
+                "title": "Tagger: Refresh Tree View"
+            },
+            {
+                "command": "tagger.refreshDecorations",
+                "title": "Tagger: Refresh Decorations"
+            },
+            {
                 "command": "tagger.refresh",
-                "title": "Tagger: Refresh"
+                "title": "Tagger: Refresh",
+                "icon": {
+					"light": "res/light/refresh.svg",
+					"dark": "res/dark/refresh.svg"
+                }
+            },
+            {
+                "command": "tagger.goToTag",
+                "title": "Tagger: Go to Tag",
+                "icon": {
+                    "light": "res/light/go.svg",
+                    "dark": "res/dark/go.svg"
+                }
+            },
+            {
+                "command": "tagger.deleteTag",
+                "title": "Tagger: Delete Tag",
+                "icon": {
+                    "light": "res/light/delete.svg",
+                    "dark": "res/dark/delete.svg"
+                }
             }
         ],
         "viewsContainers": {
@@ -34,6 +62,22 @@
                 {
                     "id": "tagger-tags",
                     "name": "Tags"
+                }
+            ]
+        },
+        "menus": {
+			"view/title": [
+				{
+					"command": "tagger.refresh",
+					"when": "view == tagger-tags",
+					"group": "navigation"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "tagger.deleteTag",
+                    "when": "view == tagger-tags && viewItem == tagTreeItem",
+                    "group": "inline"
                 }
             ]
         },

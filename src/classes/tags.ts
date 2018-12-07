@@ -184,6 +184,7 @@ export class Tags extends Array<Tag> {
                     pattern.name,
                     match[0],
                     document.uri.fsPath,
+                    match.index,
                     document.positionAt(match.index),
                     document.positionAt(match.index + match[0].length)
                 ));
