@@ -202,7 +202,7 @@ export class Tagger {
 
         // Tag parsed in
         if (tag) {
-            tag.go();
+            tag.go(this.settings.goToBehaviour);
         }
 
         // Display a list of tags to navigate to
@@ -223,7 +223,7 @@ export class Tagger {
                 vscode.window.showQuickPick(items).then(selection => {
                     if (selection) {
                         let id = parseInt(selection.label.substring(0, selection.label.indexOf(":")));
-                        this.tags[id].go();
+                        this.tags[id].go(this.settings.goToBehaviour);
                     }
                 });
 

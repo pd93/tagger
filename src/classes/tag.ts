@@ -22,14 +22,30 @@ export class Tag {
     }
 
     // go will open a tag in the editor
-    public go(): void {
+    public go(goToBehaviour: string): void {
         
         log.Info(`Jumping to tag: '${this.tooltip()}'...`);
 
+        // Create a range depending on the go-to behaviour
+        let range: vscode.Range | undefined;
+        switch (goToBehaviour) {
+            case "start":
+                range = new vscode.Range(this.start, this.start);
+                break;
+            case "end":
+                range = new vscode.Range(this.end, this.end);
+                break;
+            case "highlight":
+                range = new vscode.Range(this.start, this.end);
+                break;
+        }
+
+        // Create the text document show options
         let options: vscode.TextDocumentShowOptions = {
-            selection: new vscode.Range(this.end, this.end)
+            selection: range
         };
 
+        // Run the vscode open command with the range options
         vscode.commands.executeCommand('vscode.open', vscode.Uri.file(this.filepath), options);
     }
 

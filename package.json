@@ -104,6 +104,12 @@
                             "default": "**/node_modules/*",
                             "description": "Glob pattern for files to exclude when searching for tags."
                         },
+                        "goToBehaviour": {
+                            "type": "string",
+                            "enum": ["start", "end", "highlight"],
+                            "default": "end",
+                            "description": "Set the cursor behaviour when navigating to a tag."
+                        },
                         "defaultPattern": {
                             "type": "object",
                             "description": "Default tag settings.",

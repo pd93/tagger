@@ -25,6 +25,7 @@ export class Settings {
     public updateOn: string = "";
     public include: string = "";
     public exclude: string = "";
+    public goToBehaviour: string = "";
     public patterns: Pattern[] = [];
 
     // update prints a message and calls load
@@ -43,6 +44,7 @@ export class Settings {
         this.updateOn = config.get("updateOn") || "change";
         this.include = config.get("include") || "**/*";
         this.exclude = config.get("exclude") || "**/node_modules/*";
+        this.goToBehaviour = config.get("goToBehaviour") || "end";
         this.patterns = [];
 
         // Get default pattern settings
