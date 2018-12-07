@@ -29,7 +29,7 @@ export class Tagger {
         this.registerCommands();
 
         // Refresh everything
-        // this.refresh();
+        this.refresh();
     }
 
     // Variables

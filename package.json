@@ -10,7 +10,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:tagger.refresh"
+        "*"
     ],
     "main": "./out/extension",
     "contributes": {
