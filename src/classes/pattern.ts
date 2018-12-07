@@ -2,29 +2,17 @@
 
 import * as vscode from 'vscode';
 
-// export interface Pattern {
-//     name: string;
-//     pattern: string;
-//     include: string;
-//     exclude: string;
-//     caseSensitive: boolean;
-//     decoration: vscode.TextEditorDecorationType;
-// }
-
 export class Pattern {
 
     constructor(
         public name: string,
         pattern: string,
-        caseSensitive: boolean,
+        flags: string,
         style: vscode.DecorationRenderOptions
     ) {
+        
         // Create a new RegExp object
-        if (caseSensitive) {
-            this.regexp = new RegExp(pattern, 'g');
-        } else {
-            this.regexp = new RegExp(pattern, 'gi');
-        }
+        this.regexp = new RegExp(pattern, flags);
 
         // Create the TextEditorDecorationType
         this.textEditorDecorationType = vscode.window.createTextEditorDecorationType(style);

@@ -5,7 +5,7 @@ import * as log from '../utils/log';
 import { Pattern } from './';
 
 interface DefaultPatternSettings {
-    caseSensitive: boolean;
+    flags: string;
     style: vscode.DecorationRenderOptions;
 }
 
@@ -46,16 +46,15 @@ export class Settings {
         this.patterns = [];
 
         // Get default pattern settings
-        let caseSensitive: boolean | undefined = config.get("defaultPattern.caseSensitive");
         let defaultPatternSettings: DefaultPatternSettings = {
-            caseSensitive: caseSensitive === undefined ? true : caseSensitive,
+            flags: config.get("defaultPattern.flags") || 'g',
             style: config.get("defaultPattern.style") || {}
         };
 
         // Fetch the patterns a instances of Pattern
         let patternSettings: PatternSettings[] = config.get("patterns") || [];
         let mergedPatternSettingStyle: vscode.DecorationRenderOptions;
-        let mergedPatternSettingCaseSensitive: boolean;
+        let mergedPatternSettingFlags: string;
         
         // Loop through the pattern settings
         for (let patternSetting of patternSettings) {
@@ -73,14 +72,14 @@ export class Settings {
             }
 
             // Merge the pattern settings with the defaults
+            mergedPatternSettingFlags = patternSetting.flags ? patternSetting.flags : defaultPatternSettings.flags;
             mergedPatternSettingStyle = {...defaultPatternSettings.style, ...patternSetting.style};
-            mergedPatternSettingCaseSensitive = patternSetting.caseSensitive === undefined ? defaultPatternSettings.caseSensitive : patternSetting.caseSensitive,
     
             // Create a new pattern object from each setting
             this.patterns.push(new Pattern(
                 patternSetting.name,
                 patternSetting.pattern,
-                mergedPatternSettingCaseSensitive,
+                mergedPatternSettingFlags,
                 mergedPatternSettingStyle
             ));
         }

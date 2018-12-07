@@ -10,3 +10,4 @@
 - Handle config changes
 - Default style in settings
 - Pattern specific settings override
+- Support for all regular expression flags

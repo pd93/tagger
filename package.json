@@ -64,10 +64,10 @@
                             "type": "object",
                             "description": "Default tag settings.",
                             "properties": {
-                                "caseSensitive": {
-                                    "type": "boolean",
-                                    "default": true,
-                                    "description": "Whether or not the tag will be matched with case sensitivity."
+                                "flags": {
+                                    "type": "string",
+                                    "default": "g",
+                                    "description": "A set of flags for the regular expression."
                                 },
                                 "style": {
                                     "type": "object",
@@ -132,9 +132,9 @@
                                         "type": "string",
                                         "description": "A regular expression to match tags with (Remember to double-escape!)."
                                     },
-                                    "caseSensitive": {
-                                        "type": "boolean",
-                                        "description": "Whether or not the tag will be matched with case sensitivity (overrides default)."
+                                    "flags": {
+                                        "type": "string",
+                                        "description": "A set of flags for the regular expression (overrides default)."
                                     },
                                     "style": {
                                         "type": "object",
