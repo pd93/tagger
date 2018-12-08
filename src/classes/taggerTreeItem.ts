@@ -1,7 +1,6 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as path from 'path';
 import * as log from '../utils/log';
 import { Pattern, Tag } from './';
 
@@ -12,7 +11,7 @@ export class TaggerTreeItem extends vscode.TreeItem {
 		public readonly type: string,
 		public readonly label: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-		public readonly pattern?: Pattern,
+		public readonly pattern: Pattern,
 		public readonly tag?: Tag,
 		public readonly command?: vscode.Command
 	) {
@@ -37,10 +36,7 @@ export class TaggerTreeItem extends vscode.TreeItem {
 		
 		// If the tree item is a 'tag', set the icon
 		if (this.type === "tag") {
-			this.iconPath = {
-				light: path.join(__filename, '..', '..', '..', 'res', 'light', 'tag.svg'),
-				dark: path.join(__filename, '..', '..', '..', 'res', 'dark', 'tag.svg')
-			};
+			this.iconPath = this.pattern.svg.filename;
 		}
 
 		// Set the context value

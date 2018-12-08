@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
-import { Pattern } from './';
+import { Pattern, SVG } from './';
 
 interface DefaultPatternSettings {
     flags: string;
@@ -57,6 +57,9 @@ export class Settings {
         let patternSettings: PatternSettings[] = config.get("patterns") || [];
         let mergedPatternSettingStyle: vscode.DecorationRenderOptions;
         let mergedPatternSettingFlags: string;
+        
+        // Reset tag SVGs
+        SVG.reset();
         
         // Loop through the pattern settings
         for (let patternSetting of patternSettings) {

@@ -21,8 +21,6 @@ An extension for [Visual Studio Code](https://code.visualstudio.com) to browse, 
 
 ## Settings
 
----
-
 ### `updateOn: string` - Whether tagger should update tags when a file is changed or when it is saved.
 
 This should be set to either `change` (default), `save` or `manual`. When set to `manual`, you will need to update the tags using the `refresh` command (`F1 > "Tagger: Refresh"`) or by pushing the refresh button. Setting `updateOn` to `change` or `save` will update the tags when a file is changed or saved respectively.

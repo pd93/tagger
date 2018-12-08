@@ -8,3 +8,4 @@ export { Tagger } from './tagger';
 export { TaggerTreeDataProvider } from './taggerTreeDataProvider';
 export { TaggerTreeItem } from './taggerTreeItem';
 export { Tags } from './tags';
+export { SVG } from './svg';

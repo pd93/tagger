@@ -98,7 +98,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 				"tag",
 				tag.text,
 				vscode.TreeItemCollapsibleState.None,
-				undefined,
+				pattern,
 				tag,
 				{
 					command: 'tagger.goToTag',
