@@ -75,6 +75,11 @@
             ],
             "view/item/context": [
                 {
+                    "command": "tagger.goToTag",
+                    "when": "view == tagger-tags && viewItem == tagTreeItem",
+                    "group": "inline"
+                },
+                {
                     "command": "tagger.deleteTag",
                     "when": "view == tagger-tags && viewItem == tagTreeItem",
                     "group": "inline"

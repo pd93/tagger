@@ -84,16 +84,9 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 
 		// Init
 		let tagTreeItems: TaggerTreeItem[] = [];
-		let cmd: vscode.Command;
 		
 		// Loop through the tags
 		for (let tag of this.tagMap.get(pattern.name) || []) {
-
-			cmd = {
-				command: 'tagger.goToTag',
-				title: '',
-				arguments: [tag],
-			};
 
 			tagTreeItems.push(new TaggerTreeItem(
 				"tag",
@@ -101,7 +94,11 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 				vscode.TreeItemCollapsibleState.None,
 				undefined,
 				tag,
-				cmd
+				{
+					command: 'tagger.goToTag',
+					title: '',
+					arguments: [undefined, tag],
+				}
 			));
 		}
 		

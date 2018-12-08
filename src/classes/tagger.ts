@@ -149,13 +149,20 @@ export class Tagger {
         }));
         
         // Navigate to a tag
-        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.goToTag', (tag?: Tag) => {
-            this.goToTag(tag);
+        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.goToTag', (taggerTreeItem?: TaggerTreeItem, tag?: Tag) => {
+
+            if (taggerTreeItem && taggerTreeItem.tag) {
+                this.goToTag(taggerTreeItem.tag, false);
+            } else if (tag) {
+                this.goToTag(tag);
+            } else {
+                this.goToTag(undefined);
+            }
         }));
         
         // Delete a tag
         this.context.subscriptions.push(vscode.commands.registerCommand('tagger.deleteTag', (taggerTreeItem?: TaggerTreeItem) => {
-            this.deleteTag(taggerTreeItem);
+            this.deleteTag(taggerTreeItem ? taggerTreeItem.tag : undefined);
         }));
     }
     
@@ -198,11 +205,11 @@ export class Tagger {
     }
 
     // goToTag will navigate to the provided tag or show a quick pick to select a tag to navigate to
-    public goToTag(tag?: Tag): void {
+    public goToTag(tag?: Tag, preview: boolean = true): void {
 
         // Tag parsed in
         if (tag) {
-            tag.go(this.settings.goToBehaviour);
+            tag.go(this.settings.goToBehaviour, preview);
         }
 
         // Display a list of tags to navigate to
@@ -223,7 +230,7 @@ export class Tagger {
                 vscode.window.showQuickPick(items).then(selection => {
                     if (selection) {
                         let id = parseInt(selection.label.substring(0, selection.label.indexOf(":")));
-                        this.tags[id].go(this.settings.goToBehaviour);
+                        this.tags[id].go(this.settings.goToBehaviour, preview);
                     }
                 });
 
@@ -234,12 +241,12 @@ export class Tagger {
     }
     
     // deleteTag will remove the provided tag from the code or show a quick pick to select a tag to delete
-    public async deleteTag(taggerTreeItem?: TaggerTreeItem): Promise<void> {
+    public async deleteTag(tag?: Tag): Promise<void> {
 
         // Tag parsed in 
-        if (taggerTreeItem && taggerTreeItem.tag) {        
+        if (tag) {        
             try {
-                await taggerTreeItem.tag.delete();
+                await tag.delete();
             } catch (err) {
                 console.log(err);
             }

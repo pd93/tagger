@@ -22,7 +22,7 @@ export class Tag {
     }
 
     // go will open a tag in the editor
-    public go(goToBehaviour: string): void {
+    public go(goToBehaviour: string, preview: boolean = true): void {
         
         log.Info(`Jumping to tag: '${this.tooltip()}'...`);
 
@@ -42,7 +42,8 @@ export class Tag {
 
         // Create the text document show options
         let options: vscode.TextDocumentShowOptions = {
-            selection: range
+            selection: range,
+            preview: preview
         };
 
         // Run the vscode open command with the range options
