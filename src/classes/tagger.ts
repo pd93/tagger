@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
-import { Tag, Tags, TaggerTreeDataProvider, Decorator, Settings } from './';
+import { Tag, Tags, Pattern, TaggerTreeDataProvider, Decorator, Settings } from './';
 import { TaggerTreeItem } from './taggerTreeItem';
 
 export class Tagger {
@@ -217,20 +217,40 @@ export class Tagger {
 
             try {
 
-                // Get the items
-                let items: vscode.QuickPickItem[] = [];
-                for (let [index, tag] of this.tags.entries()) {
-                    items.push({
-                        description: tag.tooltip(),
-                        label: `${index}: ${tag.text}`
+                // Get patterns as quick pick items
+                let quickPickItemPattern: vscode.QuickPickItem[] = [];
+                for (let [index, pattern] of this.settings.patterns.entries()) {
+                    quickPickItemPattern.push({
+                        label: `${index + 1}: ${pattern.name.toUpperCase()}`,
+                        description: pattern.regexp.source,
                     });
                 }
                 
                 // Show the quick pick menu
-                vscode.window.showQuickPick(items).then(selection => {
+                vscode.window.showQuickPick(quickPickItemPattern).then(selection => {
+
                     if (selection) {
-                        let id = parseInt(selection.label.substring(0, selection.label.indexOf(":")));
-                        this.tags[id].go(this.settings.goToBehaviour, preview);
+
+                        let id: number = parseInt(selection.label.substring(0, selection.label.indexOf(":"))) - 1;
+                        let pattern: Pattern = this.settings.patterns[id];
+                        let tags: Tags = this.tags.getTags(pattern);
+                        
+                        // Get tags for pattern as quick pick items
+                        let quickPickItemTag: vscode.QuickPickItem[] = [];
+                        for (let [index, tag] of tags.entries()) {
+                            quickPickItemTag.push({
+                                label: `${index + 1}: ${tag.text}`,
+                                description: tag.tooltip()
+                            });
+                        }
+                
+                        // Show the quick pick menu
+                        vscode.window.showQuickPick(quickPickItemTag).then(selection => {
+                            if (selection) {
+                                let id: number = parseInt(selection.label.substring(0, selection.label.indexOf(":"))) - 1;
+                                tags[id].go(this.settings.goToBehaviour, preview);
+                            }
+                        });                        
                     }
                 });
 
@@ -256,21 +276,41 @@ export class Tagger {
         else {
 
             try {
-
-                // Get the items
-                let items: vscode.QuickPickItem[] = [];
-                for (let [index, tag] of this.tags.entries()) {
-                    items.push({
-                        description: tag.tooltip(),
-                        label: `${index}: ${tag.text}`
+                
+                // Get patterns as quick pick items
+                let quickPickItemPattern: vscode.QuickPickItem[] = [];
+                for (let [index, pattern] of this.settings.patterns.entries()) {
+                    quickPickItemPattern.push({
+                        label: `${index + 1}: ${pattern.name.toUpperCase()}`,
+                        description: pattern.regexp.source,
                     });
                 }
                 
                 // Show the quick pick menu
-                vscode.window.showQuickPick(items).then(selection => {
+                vscode.window.showQuickPick(quickPickItemPattern).then(selection => {
+
                     if (selection) {
-                        let id = parseInt(selection.label.substring(0, selection.label.indexOf(":")));
-                        this.tags[id].delete();
+
+                        let id: number = parseInt(selection.label.substring(0, selection.label.indexOf(":"))) - 1;
+                        let pattern: Pattern = this.settings.patterns[id];
+                        let tags: Tags = this.tags.getTags(pattern);
+                        
+                        // Get tags for pattern as quick pick items
+                        let quickPickItemTag: vscode.QuickPickItem[] = [];
+                        for (let [index, tag] of tags.entries()) {
+                            quickPickItemTag.push({
+                                label: `${index + 1}: ${tag.text}`,
+                                description: tag.tooltip()
+                            });
+                        }
+                
+                        // Show the quick pick menu
+                        vscode.window.showQuickPick(quickPickItemTag).then(selection => {
+                            if (selection) {
+                                let id: number = parseInt(selection.label.substring(0, selection.label.indexOf(":"))) - 1;
+                                tags[id].delete();
+                            }
+                        });                        
                     }
                 });
 
