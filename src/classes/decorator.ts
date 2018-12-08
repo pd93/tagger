@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
-import { Pattern, Tag } from './';
+import { Pattern, Tags } from './';
 
 export class Decorator {
 
@@ -18,7 +18,7 @@ export class Decorator {
     }
 
     // refresh will decorate the active text editor by highlighting tags
-    public refresh(tags: Map<string, Tag[]>): void {
+    public refresh(tags: Map<string, Tags>): void {
 
         log.Info("--- refreshing decorations ---");
 

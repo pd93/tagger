@@ -2,15 +2,14 @@
 
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
-import { Pattern, TaggerTreeItem } from './';
-import { Tag } from './tag';
+import { Tags, Pattern, TaggerTreeItem } from './';
 
 // TaggerTreeDataProvide will provide data to the tag view in the tagger activity tab
 export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTreeItem> {
 
 	constructor(
 		private patterns: Pattern[],
-		private tagMap: Map<string, Tag[]> = new Map()
+		private tagMap: Map<string, Tags> = new Map()
 	) {
 		log.Info("Creating TagTreeDataProvider...");
     }
@@ -25,7 +24,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
     }
 	
 	// Refresh will the refresh the tree view
-	public refresh(tagMap: Map<string, Tag[]>): void {
+	public refresh(tagMap: Map<string, Tags>): void {
 		
 		log.Info("--- refreshing tree view ---");
 		
@@ -63,12 +62,18 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 
 		// Init
 		let patternTreeItems: TaggerTreeItem[] = [];
+		let count: number;
 
 		// Loop through the patterns
 		for (let pattern of this.patterns) {
+
+			// Get the number of tags for this pattern
+			count = (this.tagMap.get(pattern.name) || new Tags()).length;
+
+			// Create the tree item
 			patternTreeItems.push(new TaggerTreeItem(
 				"pattern",
-				pattern.name.toUpperCase(),
+				`${pattern.name.toUpperCase()} (${count})`,
 				vscode.TreeItemCollapsibleState.Expanded,
 				pattern
 			));
@@ -88,6 +93,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 		// Loop through the tags
 		for (let tag of this.tagMap.get(pattern.name) || []) {
 
+			// Create the tree item
 			tagTreeItems.push(new TaggerTreeItem(
 				"tag",
 				tag.text,
