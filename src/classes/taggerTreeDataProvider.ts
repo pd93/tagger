@@ -73,7 +73,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 			// Create the tree item
 			patternTreeItems.push(new TaggerTreeItem(
 				"pattern",
-				`${pattern.name.toUpperCase()} (${count})`,
+				`<strong>${pattern.name.toUpperCase()}</strong> (${count})`,
 				vscode.TreeItemCollapsibleState.Expanded,
 				pattern
 			));

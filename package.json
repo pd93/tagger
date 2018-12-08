@@ -4,6 +4,7 @@
     "description": "An extension for Visual Studio Code to browse, highlight and manage in-code tags, todos and notes",
     "version": "1.0.0",
     "license": "SEE LICENSE IN LICENSE",
+    "publisher": "pd93",
     "author": {
         "name": "Peter Davison"
     },
