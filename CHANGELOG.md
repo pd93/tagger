@@ -6,9 +6,9 @@
 - Tag browser
 - Highlight tags
 - Alphabetical tag sorting
-- Go to tag
-- Handle config changes
-- Default style in settings
-- Pattern specific settings override
-- Support for all regular expression flags
-- Delete tags
+- Commands
+  - Go to tag(s)
+  - Delete tag(s)
+- Hot config readloading
+- Settings overrides
+- Support for regular expression flags

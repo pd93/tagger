@@ -1,28 +1,8 @@
 # pd93 / tagger / roadmap
 
-## v1.0.0
+This is a list of planned features:
 
-- Regex pattern matching
-- Tag browser
-- Highlight tags
-- Go to tag
-- Handle config changes
-- Default style
-- Pattern specific settings override
-- Travis CI
-
-## v1.1.0
-
-- Tag Actions
-- Highlight tree items
-
-## v1.2.0
-
+- Highlight tree items (blocked by [vscode #54938](https://github.com/Microsoft/vscode/issues/54938))
 - Search
 - Sorting Options
-
----
-
-## Future
-
-- Gitlab/Github support
+- Links to issues/MRs/PRs for tags with issue/MR/PR numbers

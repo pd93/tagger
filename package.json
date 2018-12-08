@@ -1,13 +1,32 @@
 {
     "name": "tagger",
-    "displayName": "tagger",
-    "description": "A VSCode extension to view, highlight and manage in-code tags",
+    "displayName": "Tagger",
+    "description": "An extension for Visual Studio Code to browse, highlight and manage in-code tags, todos and notes",
     "version": "1.0.0",
+    "license": "SEE LICENSE IN LICENSE",
+    "author": {
+        "name": "Peter Davison"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/pd93/vscode-tagger"
+    },
     "engines": {
         "vscode": "^1.29.0"
     },
     "categories": [
         "Other"
+    ],
+    "keywords": [
+        "tagger",
+        "tag",
+        "tags",
+        "todo",
+        "todos",
+        "note",
+        "notes",
+        "highlight",
+        "highlighter"
     ],
     "activationEvents": [
         "*"
