@@ -139,5 +139,5 @@ You can format the text that is displayed for the tag by using [capture groups](
 
 ## Known Issues
 
-- When a file is deleted, tags that were present in that file are not removed from the list.
 - When hot reloading the `settings.json` file, tag decorations stop rendering correctly.
+- When untitled files containing tags are saved, duplicates appear in the tree view.

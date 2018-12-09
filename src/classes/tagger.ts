@@ -32,7 +32,9 @@ export class Tagger {
         this.registerCommands();
 
         // Refresh everything
-        this.refresh();
+        this.update().then(() => {
+            this.refresh();
+        });
     }
 
     // Variables
@@ -158,7 +160,9 @@ export class Tagger {
                 this.taggerTreeDataProvider.setPatterns(this.settings.patterns);
 
                 // Refresh everything
-                this.refresh();
+                this.update().then(() => {
+                    this.refresh();
+                });
             }
         });
     }
@@ -177,7 +181,9 @@ export class Tagger {
         
         // Refresh everything
         this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refresh', () => {
-            this.refresh();
+            this.update().then(() => {
+                this.refresh();
+            });
         }));
         
         // Navigate to a tag
@@ -219,20 +225,9 @@ export class Tagger {
     }
     
     // refresh will perform a full update of all tags and refresh the tree view and decorations
-    public async refresh(): Promise<void> {
-
-        try {
-
-            // Update all the tags
-            await this.tags.update(this.settings.patterns, this.settings.include, this.settings.exclude);
-            
-            // Refresh the tree view and decorations
-            this.refreshTreeView();
-            this.refreshDecorations();
-
-        } catch (err) {
-            console.log(err);
-        }
+    public refresh(): void {
+        this.refreshTreeView();
+        this.refreshDecorations();
     }
 
     // goToTag will navigate to the provided tag or show a quick pick to select a tag to navigate to
@@ -348,6 +343,19 @@ export class Tagger {
             } catch (err) {
                 console.log(err);
             }
+        }
+    }
+
+    //
+    // Helpers
+    //
+
+    // Update all the tag views
+    private async update(): Promise<void> {
+        try {
+            await this.tags.update(this.settings.patterns, this.settings.include, this.settings.exclude);
+        } catch (err) {
+            console.log(err);
         }
     }
 }
