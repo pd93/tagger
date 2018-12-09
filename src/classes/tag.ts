@@ -9,11 +9,17 @@ export class Tag {
     constructor(
         public readonly name: string,
         public readonly text: string,
+        public readonly groups: string[],
         public readonly filepath: string,
         public readonly index: number,
         public readonly start: vscode.Position,
         public readonly end: vscode.Position
     ) {}
+
+    // pretty will return the pretty tag text (concatenated from the capture groups)
+    public pretty() {
+        return this.groups.join(" ");
+    }
 
     // tooltip will return a tooltip string
     public tooltip(): string {

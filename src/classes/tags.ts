@@ -13,7 +13,9 @@ export class Tags extends Array<Tag> {
     // sortTags will sort the tag array alphabetically
     public sortTags() {
         this.sort((a: Tag, b: Tag) => {
-            return a.text > b.text ? 1 : (a.text < b.text ? -1 : 0);
+            let pa = a.pretty();
+            let pb = b.pretty();
+            return pa > pb ? 1 : (pa < pb ? -1 : 0);
         });
     }
 
@@ -183,6 +185,7 @@ export class Tags extends Array<Tag> {
                 this.push(new Tag(
                     pattern.name,
                     match[0],
+                    match.slice(1, match.length),
                     document.uri.fsPath,
                     match.index,
                     document.positionAt(match.index),

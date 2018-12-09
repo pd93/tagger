@@ -2,7 +2,16 @@
 
 This is a list of planned features:
 
-- Highlight tree items (blocked by [vscode #54938](https://github.com/Microsoft/vscode/issues/54938))
-- Search
-- Sorting Options
+- Commands / Buttons:
+  - Collapse tree view
+  - Toggle decorations
+  - Search
+  - Sort
+- Settings:
+  - Enable/disable tagger
+  - Enable/disable status bar
+  - Enable/disable by language id
+  - Only match tags in comments
+  - Array support for include/exclude
+- Status bar icon and number
 - Links to issues/MRs/PRs for tags with issue/MR/PR numbers

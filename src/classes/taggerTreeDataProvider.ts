@@ -96,7 +96,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 			// Create the tree item
 			tagTreeItems.push(new TaggerTreeItem(
 				"tag",
-				tag.text,
+				tag.pretty(),
 				vscode.TreeItemCollapsibleState.None,
 				pattern,
 				tag,

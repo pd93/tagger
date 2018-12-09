@@ -239,7 +239,7 @@ export class Tagger {
                         let quickPickItemTag: vscode.QuickPickItem[] = [];
                         for (let [index, tag] of tags.entries()) {
                             quickPickItemTag.push({
-                                label: `${index + 1}: ${tag.text}`,
+                                label: `${index + 1}: ${tag.pretty()}`,
                                 description: tag.tooltip()
                             });
                         }
@@ -299,7 +299,7 @@ export class Tagger {
                         let quickPickItemTag: vscode.QuickPickItem[] = [];
                         for (let [index, tag] of tags.entries()) {
                             quickPickItemTag.push({
-                                label: `${index + 1}: ${tag.text}`,
+                                label: `${index + 1}: ${tag.pretty()}`,
                                 description: tag.tooltip()
                             });
                         }

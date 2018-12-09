@@ -6,9 +6,13 @@
 - Tag browser
 - Highlight tags
 - Alphabetical tag sorting
-- Commands
-  - Go to tag(s)
-  - Delete tag(s)
-- Hot config readloading
-- Settings overrides
-- Support for regular expression flags
+- Added commands:
+  - Go to tag
+  - Delete tag
+  - Refresh
+  - Refresh Decoration
+  - Refresh Tree View
+- Added the ability to hot reload the `settings.json` file
+- Added overrides for appropriate pattern settings.
+- Added support for regular expression flags
+- Added display formatting with capture groups
