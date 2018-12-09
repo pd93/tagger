@@ -18,7 +18,16 @@ export class Tag {
 
     // pretty will return the pretty tag text (concatenated from the capture groups)
     public pretty() {
-        return this.groups.join(" ");
+
+        // If there are capture groups
+        if (this.groups.length > 0) {
+
+            // Join and return them
+            return this.groups.join(" ").trim();
+        }
+
+        // Otherwise, return the full text
+        return this.text.trim();
     }
 
     // tooltip will return a tooltip string

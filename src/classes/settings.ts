@@ -53,7 +53,7 @@ export class Settings {
             style: config.get("defaultPattern.style") || {}
         };
 
-        // Fetch the patterns a instances of Pattern
+        // Fetch the patterns settings
         let patternSettings: PatternSettings[] = config.get("patterns") || [];
         let mergedPatternSettingStyle: vscode.DecorationRenderOptions;
         let mergedPatternSettingFlags: string;
