@@ -56,52 +56,145 @@ export class Tags extends Array<Tag> {
     }
 
     // updateForFile will remove and re-add the tags for a given file
-    public async updateForFile(patterns: Pattern[], file: vscode.Uri, sort: boolean = true): Promise<boolean> {
-
-        // Init
-		let document: vscode.TextDocument;
-
+    public async updateForFile(patterns: Pattern[], uri: vscode.Uri, sort: boolean = true): Promise<number> {
         try {
-
-            // Get the file as a TextDocument
-            document = await vscode.workspace.openTextDocument(file.fsPath);
-
-            // Update the tags for the document
-            this.updateForDocument(patterns, document, sort);
-
+            let document: vscode.TextDocument = await this.getDocument(uri);
+            return this.updateForDocument(patterns, document, sort);
         } catch (err) {
-
-            // If there's a problem reading the file, skip it and return false
-            log.Info(`[Skipping] file: '${file.fsPath}'...`);
-
-            return false;
+            return -1;
         }
-
-        return true;
     }
 
-    // updateForDocument will remove and re-add the tags for given document
-    public updateForDocument(patterns: Pattern[], document: vscode.TextDocument, sort: boolean = true): void {
+    // addForFile will add the tags for a given file
+    public async addForFile(patterns: Pattern[], uri: vscode.Uri): Promise<number> {
+        try {
+            let document = await vscode.workspace.openTextDocument(uri.fsPath);
+            return this.addForDocument(patterns, document);
+        } catch (err) {
+            return -1;
+        }
+    }
 
-        // Remove the existing tags
-        let removed = this.removeTagsForDocument(document);
-    
-        // Add the new tags
-        let added = this.addTagsForDocument(patterns, document);
+    // removeForFile will remove the tags for a given file
+    public removeForFile(uri: vscode.Uri, sort: boolean = true): number {
         
-        log.Info(`[+${added} -${removed} = ${added-removed}] file: '${document.fileName}'`);
+        // Init
+        let count: number = 0;
+        
+        // Loop through the instance tags
+        for (let index = 0; index < this.length; index++) {
+            
+            // If the filepaths match
+            if (this[index].filepath === uri.fsPath) {
+                
+                // Remove the tag from the array
+                this.splice(index, 1);
+                
+                index--;
+                count++;
+            }
+        }
         
         // Sort the tags
         if (sort) {
             this.sortTags();
         }
+        
+        log.Info(`Removed ${count} tags for file: ${uri.fsPath}`);
+
+        return count;
     }
 
+    // updateForDocument will remove and re-add the tags for given document
+    public updateForDocument(patterns: Pattern[], document: vscode.TextDocument, sort: boolean = true): number {
+
+        // Remove the existing tags
+        let removed = this.removeForDocument(document, false);
+    
+        // Add the new tags
+        let added = this.addForDocument(patterns, document, false);
+        
+        // Sort the tags
+        if (sort) {
+            this.sortTags();
+        }
+
+        return added + removed;
+    }
+
+    // addForDocument will add all the tags for a given document
+    public addForDocument(patterns: Pattern[], document: vscode.TextDocument, sort: boolean = true): number {
+
+        // Init
+        let count: number = 0;
+        let match: RegExpExecArray | null;
+        
+        // Loop through the patterns
+        for (let pattern of patterns) {
+
+            // Loop through all the matches
+            while (match = pattern.regexp.exec(document.getText())) {
+
+                // Add the tag to the array
+                this.push(new Tag(
+                    pattern.name,
+                    match[0],
+                    match.slice(1, match.length),
+                    document.uri.fsPath,
+                    match.index,
+                    document.positionAt(match.index),
+                    document.positionAt(match.index + match[0].length)
+                ));
+
+                count++;
+            }
+        }
+        
+        // Sort the tags
+        if (sort) {
+            this.sortTags();
+        }
+
+        log.Info(`Added ${count} tags for file: ${document.fileName}`);
+        
+        return count;
+    }
+    
+    // removeForDocument will remove all the tags for a given document
+    public removeForDocument(document: vscode.TextDocument, sort: boolean = true): number {
+        
+        // Init
+        let count: number = 0;
+        
+        // Loop through the instance tags
+        for (let index = 0; index < this.length; index++) {
+            
+            // If the filepaths match
+            if (this[index].filepath === document.fileName) {
+                
+                // Remove the tag from the array
+                this.splice(index, 1);
+                
+                index--;
+                count++;
+            }
+        }
+        
+        // Sort the tags
+        if (sort) {
+            this.sortTags();
+        }
+        
+        log.Info(`Removed ${count} tags for file: ${document.fileName}`);
+
+        return count;
+    }
+    
     //
     // Getters
     //
 
-    // getTags will return an array of tags found for a given pattern and document
+    // getTags will return an array of tags found for a given pattern and/or document
     public getTags(pattern: Pattern, document?: vscode.TextDocument): Tags {
 
         // Init
@@ -128,6 +221,7 @@ export class Tags extends Array<Tag> {
         return tags;
     }
 
+    // getTagsAsMap will return a map of patterns to tags found globally or for a given document
     public getTagsAsMap(patterns: Pattern[], document?: vscode.TextDocument): Map<string, Tags> {
         
         // Init
@@ -145,57 +239,20 @@ export class Tags extends Array<Tag> {
     // Helpers
     //
 
-    // removeTagsForDocument will remove all the tags for a given document
-    private removeTagsForDocument(document: vscode.TextDocument): number {
+    // 
+    private async getDocument(uri: vscode.Uri): Promise<vscode.TextDocument> {
 
-        // Init
-        let count: number = 0;
+        try {
 
-        // Loop through the instance tags
-        for (let index = 0; index < this.length; index++) {
+            // Get the file as a TextDocument
+            return await vscode.workspace.openTextDocument(uri.fsPath);
 
-            // If the filepaths match
-            if (this[index].filepath === document.fileName) {
+        } catch (err) {
 
-                // Remove the tag from the array
-                this.splice(index, 1);
+            // If there's a problem reading the file, skip it and return false
+            log.Info(`[Skipping] file: '${uri.fsPath}'...`);
 
-                index--;
-                count++;
-            }
+            return Promise.reject(err);
         }
-
-        return count;
-    }
-
-    // addTagsForDocument will add all the tags for a given document
-    private addTagsForDocument(patterns: Pattern[], document: vscode.TextDocument): number {
-
-        // Init
-        let count: number = 0;
-        let match: RegExpExecArray | null;
-        
-        // Loop through the patterns
-        for (let pattern of patterns) {
-
-            // Loop through all the matches
-            while (match = pattern.regexp.exec(document.getText())) {
-
-                // Add the tag to the array
-                this.push(new Tag(
-                    pattern.name,
-                    match[0],
-                    match.slice(1, match.length),
-                    document.uri.fsPath,
-                    match.index,
-                    document.positionAt(match.index),
-                    document.positionAt(match.index + match[0].length)
-                ));
-
-                count++;
-            }
-        }
-
-        return count;
     }
 }

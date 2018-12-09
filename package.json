@@ -115,7 +115,7 @@
                     "properties": {
                         "updateOn": {
                             "type": "string",
-                            "enum": ["change", "save"],
+                            "enum": ["change", "save", "manual"],
                             "default": "change",
                             "description": "Whether tagger should update tags when a file is changed or when it is saved."
                         },

@@ -16,6 +16,9 @@ export class Tagger {
         // Get the tagger settings
         this.settings = new Settings();
 
+        // Create a filesystem watcher
+        this.watcher = vscode.workspace.createFileSystemWatcher(this.settings.include);
+
         // Register a decorator
         this.registerDecorator(new Decorator(this.settings.patterns));
 
@@ -37,6 +40,7 @@ export class Tagger {
     public tags: Tags = new Tags();
     private taggerTreeDataProvider!: TaggerTreeDataProvider;
     private decorator!: Decorator;
+    private watcher: vscode.FileSystemWatcher;
 
     //
     // Registrars
@@ -58,59 +62,87 @@ export class Tagger {
         this.decorator = decorator;
     }
 
+    // registerListeners will register the listen events with the tagger instance and vscode
     public registerListeners(): void {      
 
-        switch (this.settings.updateOn) {
+        if (this.settings.updateOn === "change") {
 
-            // Listen to document change events
-            case "change":
+            vscode.workspace.onDidChangeTextDocument(event => {
 
-                vscode.workspace.onDidChangeTextDocument(event => {
+                // Update tags for the file that changed
+                this.tags.updateForDocument(this.settings.patterns, event.document);
 
-                    // Update tags for the file that changed
-                    this.tags.updateForDocument(this.settings.patterns, event.document);
+                // Refresh the tree view
+                this.refreshTreeView();
 
-                    // Refresh the tree view
-                    this.refreshTreeView();
-
-                    // If the file tht changed is currently open, update the decorations too
-                    if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
-                        this.refreshDecorations();
-                    }
-
-                }, null, this.context.subscriptions);
-
-                break;
-
-            // Listen to save document events
-            case "save":
-
-                vscode.workspace.onDidSaveTextDocument(event => {
-
-                    // Update tags for the file that changed
-                    this.tags.updateForFile(this.settings.patterns, event.uri);
-
-                    // Refresh the tree view
-                    this.refreshTreeView();
-
-                    // If the file tht changed is currently open, update the decorations too
-                    if (vscode.window.activeTextEditor && event.fileName === vscode.window.activeTextEditor.document.fileName) {
-                        this.refreshDecorations();
-                    }
-
-                }, null, this.context.subscriptions);
-                break;
+                // If the file tht changed is currently open, update the decorations too
+                if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
+                    this.refreshDecorations();
+                }
+                
+            }, null, this.context.subscriptions);
         }
 
-        // Listen for when the active editor changes
-        vscode.window.onDidChangeActiveTextEditor(editor => {
+        if (this.settings.updateOn !== "manual") {
+            
+            // When a file on the system is changed
+            this.watcher.onDidChange(async uri => {
+            
+                // Update tags for the file that changed
+                if (await this.tags.updateForFile(this.settings.patterns, uri) >= 0) {
+                    
+                    // Refresh the tree view
+                    this.refreshTreeView();
+                    
+                    // If the file tht changed is currently open, update the decorations too
+                    if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
+                        this.refreshDecorations();
+                    }
+                }
+            });
+            
+            // When a file on the system is created
+            this.watcher.onDidCreate(async uri => {
+                
+                // Update tags for the file that changed
+                if (await this.tags.addForFile(this.settings.patterns, uri) > 0) {
+                    
+                    // Refresh the tree view
+                    this.refreshTreeView();
+                    
+                    // If the file tht changed is currently open, update the decorations too
+                    if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
+                        this.refreshDecorations();
+                    }
+                }
+            });
+            
+            // When a file on the system is deleted
+            this.watcher.onDidDelete(async uri => {
+                
+                // Update tags for the file that changed
+                if (await this.tags.removeForFile(uri) > 0) {
+                    
+                    // Refresh the tree view
+                    this.refreshTreeView();
+                    
+                    // If the file tht changed is currently open, update the decorations too
+                    if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
+                        this.refreshDecorations();
+                    }
+                }
+            });
 
-            // If the editor is active, refresh the decorations
-            if (editor) {
-                this.refreshDecorations();
-            }
+            // Listen for when the active editor changes
+            vscode.window.onDidChangeActiveTextEditor(editor => {
 
-        }, null, this.context.subscriptions);
+                // If the editor is active, refresh the decorations
+                if (editor) {
+                    this.refreshDecorations();
+                }
+
+            }, null, this.context.subscriptions);
+        }
 
         // Listen for configuration changes
         vscode.workspace.onDidChangeConfiguration(event => {
@@ -150,7 +182,6 @@ export class Tagger {
         
         // Navigate to a tag
         this.context.subscriptions.push(vscode.commands.registerCommand('tagger.goToTag', (taggerTreeItem?: TaggerTreeItem, tag?: Tag) => {
-
             if (taggerTreeItem && taggerTreeItem.tag) {
                 this.goToTag(taggerTreeItem.tag, false);
             } else if (tag) {
