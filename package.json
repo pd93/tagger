@@ -47,8 +47,8 @@
                 "command": "tagger.refresh",
                 "title": "Tagger: Refresh",
                 "icon": {
-					"light": "res/light/refresh.svg",
-					"dark": "res/dark/refresh.svg"
+                    "light": "res/light/refresh.svg",
+                    "dark": "res/dark/refresh.svg"
                 }
             },
             {
@@ -86,11 +86,11 @@
             ]
         },
         "menus": {
-			"view/title": [
-				{
-					"command": "tagger.refresh",
-					"when": "view == tagger-tags",
-					"group": "navigation"
+            "view/title": [
+                {
+                    "command": "tagger.refresh",
+                    "when": "view == tagger-tags",
+                    "group": "navigation"
                 }
             ],
             "view/item/context": [
@@ -115,7 +115,11 @@
                     "properties": {
                         "updateOn": {
                             "type": "string",
-                            "enum": ["change", "save", "manual"],
+                            "enum": [
+                                "change",
+                                "save",
+                                "manual"
+                            ],
                             "default": "change",
                             "description": "Whether tagger should update tags when a file is changed or when it is saved."
                         },
@@ -131,7 +135,11 @@
                         },
                         "goToBehaviour": {
                             "type": "string",
-                            "enum": ["start", "end", "highlight"],
+                            "enum": [
+                                "start",
+                                "end",
+                                "highlight"
+                            ],
                             "default": "end",
                             "description": "Set the cursor behaviour when navigating to a tag."
                         },
@@ -197,7 +205,10 @@
                             "description": "An array of patterns to match tags with.",
                             "items": {
                                 "type": "object",
-                                "required": ["name", "pattern"],
+                                "required": [
+                                    "name",
+                                    "pattern"
+                                ],
                                 "properties": {
                                     "name": {
                                         "type": "string",
@@ -277,5 +288,8 @@
         "tslint": "^5.8.0",
         "@types/node": "^8.10.25",
         "@types/mocha": "^2.2.42"
+    },
+    "dependencies": {
+        "@types/minimatch": "^3.0.3"
     }
 }

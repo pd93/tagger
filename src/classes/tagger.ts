@@ -1,9 +1,9 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import * as minimatch from 'minimatch';
 import * as log from '../utils/log';
-import { Tag, Tags, Pattern, TaggerTreeDataProvider, Decorator, Settings } from './';
-import { TaggerTreeItem } from './taggerTreeItem';
+import { Tag, Tags, Pattern, TaggerTreeDataProvider, TaggerTreeItem, Decorator, Settings } from './';
 
 export class Tagger {
 
@@ -71,15 +71,22 @@ export class Tagger {
 
             vscode.workspace.onDidChangeTextDocument(event => {
 
-                // Update tags for the file that changed
-                this.tags.updateForDocument(this.settings.patterns, event.document);
+                if (this.shouldSearchDocument(event.document)) {
 
-                // Refresh the tree view
-                this.refreshTreeView();
-
-                // If the file tht changed is currently open, update the decorations too
-                if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
-                    this.refreshDecorations();
+                    console.log(`[doc change] ${event.document.uri.fsPath}`);
+                    
+                    // Update tags for the file that changed
+                    this.tags.updateForDocument(this.settings.patterns, event.document);
+                    
+                    // Refresh the tree view
+                    this.refreshTreeView();
+                    
+                    // If the file tht changed is currently open, update the decorations too
+                    if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
+                        this.refreshDecorations();
+                    }
+                } else {
+                    console.log(`[doc change] [skipped] ${event.document.uri.fsPath}`);
                 }
                 
             }, null, this.context.subscriptions);
@@ -89,58 +96,79 @@ export class Tagger {
             
             // When a file on the system is changed
             this.watcher.onDidChange(async uri => {
+                
+                if (this.shouldSearchFile(uri)) {
+    
+                    console.log(`[fs change] ${uri.fsPath}`);
             
-                // Update tags for the file that changed
-                if (await this.tags.updateForFile(this.settings.patterns, uri) >= 0) {
-                    
-                    // Refresh the tree view
-                    this.refreshTreeView();
-                    
-                    // If the file tht changed is currently open, update the decorations too
-                    if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
-                        this.refreshDecorations();
+                    // Update tags for the file that changed
+                    if (await this.tags.updateForFile(this.settings.patterns, uri) >= 0) {
+                        
+                        // Refresh the tree view
+                        this.refreshTreeView();
+                        
+                        // If the file tht changed is currently open, update the decorations too
+                        if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
+                            this.refreshDecorations();
+                        }
                     }
+                } else {
+                    console.log(`[fs change] [skipped] ${uri.fsPath}`);
                 }
             });
             
             // When a file on the system is created
             this.watcher.onDidCreate(async uri => {
+
+                if (this.shouldSearchFile(uri)) {
+    
+                    console.log(`[fs create] ${uri.fsPath}`);
                 
-                // Update tags for the file that changed
-                if (await this.tags.addForFile(this.settings.patterns, uri) > 0) {
-                    
-                    // Refresh the tree view
-                    this.refreshTreeView();
-                    
-                    // If the file tht changed is currently open, update the decorations too
-                    if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
-                        this.refreshDecorations();
+                    // Update tags for the file that changed
+                    if (await this.tags.updateForFile(this.settings.patterns, uri) > 0) {
+                        
+                        // Refresh the tree view
+                        this.refreshTreeView();
+                        
+                        // If the file tht changed is currently open, update the decorations too
+                        if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
+                            this.refreshDecorations();
+                        }
                     }
+                } else {
+                    console.log(`[fs create] [skipped] ${uri.fsPath}`);
                 }
             });
             
             // When a file on the system is deleted
             this.watcher.onDidDelete(async uri => {
+
+                if (this.shouldSearchFile(uri)) {
+    
+                    console.log(`[fs delete] ${uri.fsPath}`);
                 
-                // Update tags for the file that changed
-                if (await this.tags.removeForFile(uri) > 0) {
-                    
-                    // Refresh the tree view
-                    this.refreshTreeView();
-                    
-                    // If the file tht changed is currently open, update the decorations too
-                    if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
-                        this.refreshDecorations();
+                    // Update tags for the file that changed
+                    if (await this.tags.removeForFile(uri) > 0) {
+                        
+                        // Refresh the tree view
+                        this.refreshTreeView();
+                        
+                        // If the file tht changed is currently open, update the decorations too
+                        if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
+                            this.refreshDecorations();
+                        }
                     }
+                } else {
+                    console.log(`[fs delete] [skipped] ${uri.fsPath}`);   
                 }
             });
 
             // Listen for when the active editor changes
-            vscode.window.onDidChangeActiveTextEditor(editor => {
+            vscode.window.onDidChangeVisibleTextEditors(editors => {
 
                 // If the editor is active, refresh the decorations
-                if (editor) {
-                    this.refreshDecorations();
+                if (editors) {
+                    this.refreshDecorations(editors);
                 }
 
             }, null, this.context.subscriptions);
@@ -213,15 +241,19 @@ export class Tagger {
     }
 
     // refreshDecorations will decorate the active text editor using the latest tags
-    public refreshDecorations(): void {
+    public refreshDecorations(editors?: vscode.TextEditor[]): void {
         
-        // Ensure there is an active editor
-        let editor = vscode.window.activeTextEditor;
-        if (!editor || !editor.document) {
-            return;
+        // Init
+        if (!editors) {
+            editors = vscode.window.visibleTextEditors;
         }
-
-        this.decorator.refresh(this.tags.getTagsAsMap(this.settings.patterns, editor.document));
+        
+        // Loop through the editors and refresh them
+        for (let editor of editors) {
+            if (this.shouldSearchDocument(editor.document)) {
+                this.decorator.refresh(editor, this.tags.getTagsAsMap(this.settings.patterns, editor.document));
+            }
+        }
     }
     
     // refresh will perform a full update of all tags and refresh the tree view and decorations
@@ -357,5 +389,16 @@ export class Tagger {
         } catch (err) {
             console.log(err);
         }
+    }
+    
+    // shouldSearchDocument returns whether or not tagger should search for tags in a given file
+    private shouldSearchFile(uri: vscode.Uri) {
+        let excludeRegExp: RegExp = new RegExp(/^(?:\\\d+\\.*|.*settings.json)$/);
+        return !excludeRegExp.test(uri.fsPath) && minimatch.match([uri.fsPath], this.settings.exclude).length === 0;
+    }
+
+    // shouldSearchDocument returns whether or not tagger should search for tags in a given document
+    private shouldSearchDocument(document: vscode.TextDocument) {
+        return !document.isUntitled && this.shouldSearchFile(document.uri);
     }
 }

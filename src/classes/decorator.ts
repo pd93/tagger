@@ -18,16 +18,12 @@ export class Decorator {
     }
 
     // refresh will decorate the active text editor by highlighting tags
-    public refresh(tags: Map<string, Tags>): void {
+    public refresh(editor: vscode.TextEditor, tags: Map<string, Tags>): void {
 
-        log.Info("--- refreshing decorations ---");
+        log.Info(`--- refreshing decorations for file: ${editor.document.uri.fsPath} ---`);
 
         // Init
         let ranges: vscode.Range[];
-        let editor = vscode.window.activeTextEditor;
-        if (!editor || !editor.document) {
-            return;
-        }
         
         // Loop through the patterns
         for (let pattern of this.patterns) {
