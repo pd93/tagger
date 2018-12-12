@@ -128,7 +128,7 @@ export class Tag {
         // Write the file
         fs.writeFile(document.fileName, text, (err) => {
             if (err) {
-                console.log(err);
+                log.Error(err);
             }
         });
     }

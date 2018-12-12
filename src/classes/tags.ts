@@ -1,6 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import chalk from 'chalk';
 import * as log from '../utils/log';
 import { Pattern, Tag } from './';
 
@@ -100,7 +101,7 @@ export class Tags extends Array<Tag> {
             this.sortTags();
         }
         
-        log.Info(`Removed ${count} tags for file: ${uri.fsPath}`);
+        log.Info(`${chalk.red(`-${count}`)}: ${uri.fsPath}`);
 
         return count;
     }
@@ -155,7 +156,7 @@ export class Tags extends Array<Tag> {
             this.sortTags();
         }
 
-        log.Info(`Added ${count} tags for file: ${document.fileName}`);
+        log.Info(`${chalk.green(`+${count}`)}: ${document.uri.fsPath}`);
         
         return count;
     }
@@ -185,7 +186,7 @@ export class Tags extends Array<Tag> {
             this.sortTags();
         }
         
-        log.Info(`Removed ${count} tags for file: ${document.fileName}`);
+        log.Info(`${chalk.red(`-${count}`)}: ${document.uri.fsPath}`);
 
         return count;
     }

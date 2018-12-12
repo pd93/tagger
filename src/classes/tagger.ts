@@ -73,7 +73,7 @@ export class Tagger {
 
                 if (this.shouldSearchDocument(event.document)) {
 
-                    console.log(`[doc change] ${event.document.uri.fsPath}`);
+                    log.Event("doc change", event.document.uri.fsPath);
                     
                     // Update tags for the file that changed
                     this.tags.updateForDocument(this.settings.patterns, event.document);
@@ -86,7 +86,7 @@ export class Tagger {
                         this.refreshDecorations();
                     }
                 } else {
-                    console.log(`[doc change] [skipped] ${event.document.uri.fsPath}`);
+                    log.Event("doc change", `[skipped] ${event.document.uri.fsPath}`);
                 }
                 
             }, null, this.context.subscriptions);
@@ -99,7 +99,7 @@ export class Tagger {
                 
                 if (this.shouldSearchFile(uri)) {
     
-                    console.log(`[fs change] ${uri.fsPath}`);
+                    log.Event("fs change", uri.fsPath);
             
                     // Update tags for the file that changed
                     if (await this.tags.updateForFile(this.settings.patterns, uri) >= 0) {
@@ -113,7 +113,7 @@ export class Tagger {
                         }
                     }
                 } else {
-                    console.log(`[fs change] [skipped] ${uri.fsPath}`);
+                    log.Event("fs change", `[skipped] ${uri.fsPath}`);
                 }
             });
             
@@ -122,7 +122,7 @@ export class Tagger {
 
                 if (this.shouldSearchFile(uri)) {
     
-                    console.log(`[fs create] ${uri.fsPath}`);
+                    log.Event("fs create", uri.fsPath);
                 
                     // Update tags for the file that changed
                     if (await this.tags.updateForFile(this.settings.patterns, uri) > 0) {
@@ -136,7 +136,7 @@ export class Tagger {
                         }
                     }
                 } else {
-                    console.log(`[fs create] [skipped] ${uri.fsPath}`);
+                    log.Event("fs create", `[skipped] ${uri.fsPath}`);
                 }
             });
             
@@ -145,7 +145,7 @@ export class Tagger {
 
                 if (this.shouldSearchFile(uri)) {
     
-                    console.log(`[fs delete] ${uri.fsPath}`);
+                    log.Event("fs delete", uri.fsPath);
                 
                     // Update tags for the file that changed
                     if (await this.tags.removeForFile(uri) > 0) {
@@ -159,7 +159,7 @@ export class Tagger {
                         }
                     }
                 } else {
-                    console.log(`[fs delete] [skipped] ${uri.fsPath}`);   
+                    log.Event("fs delete", `[skipped] ${uri.fsPath}`);   
                 }
             });
 
@@ -313,7 +313,7 @@ export class Tagger {
                 });
 
             } catch (err) {
-                console.log(err);
+                log.Error(err);
             }
         }
     }
@@ -326,7 +326,7 @@ export class Tagger {
             try {
                 await tag.delete();
             } catch (err) {
-                console.log(err);
+                log.Error(err);
             }
         }
 
@@ -373,7 +373,7 @@ export class Tagger {
                 });
 
             } catch (err) {
-                console.log(err);
+                log.Error(err);
             }
         }
     }
@@ -387,7 +387,7 @@ export class Tagger {
         try {
             await this.tags.update(this.settings.patterns, this.settings.include, this.settings.exclude);
         } catch (err) {
-            console.log(err);
+            log.Error(err);
         }
     }
     
