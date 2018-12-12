@@ -5,19 +5,19 @@ import chalk from 'chalk';
 chalk.enabled = true;
 chalk.level = 1;
 
-export function Info(message: string) {
+export function Info(message: string = "") {
     log("info", message);
 }
 
-export function Debug(message: string) {
+export function Debug(message: string = "") {
     log("debug", message);
 }
 
-export function Event(event: string, message: string) {
+export function Event(event: string, message: string = "") {
     log("event", `[${event}] ${message}`);
 }
 
-export function Refresh(refresh: string, message: string) {
+export function Refresh(refresh: string, message: string = "") {
     log("refresh", `[${refresh}] ${message}`);
 }
 

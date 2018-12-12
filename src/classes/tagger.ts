@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import * as minimatch from 'minimatch';
 import * as log from '../utils/log';
-import { Tag, Tags, Pattern, TaggerTreeDataProvider, TaggerTreeItem, Decorator, Settings } from './';
+import { Tag, Tags, Pattern, TaggerTreeDataProvider, TaggerTreeItem, Decorator, StatusBarItem, Settings } from './';
 
 export class Tagger {
 
@@ -19,11 +19,14 @@ export class Tagger {
         // Create a filesystem watcher
         this.watcher = vscode.workspace.createFileSystemWatcher(this.settings.include);
 
-        // Register a decorator
-        this.registerDecorator(new Decorator(this.settings.patterns));
-
         // Register a tree view
-        this.registerTreeDataProvider(new TaggerTreeDataProvider(this.settings.patterns));
+        this.registerTreeDataProvider();
+
+        // Register a status bar item
+        this.registerStatusBarItem();
+
+        // Register a decorator
+        this.registerDecorator();
 
         // Register listeners
         this.registerListeners();
@@ -41,6 +44,7 @@ export class Tagger {
     public settings: Settings;
     public tags: Tags = new Tags();
     private taggerTreeDataProvider!: TaggerTreeDataProvider;
+    private statusBarItem!: StatusBarItem;
     private decorator!: Decorator;
     private watcher: vscode.FileSystemWatcher;
 
@@ -49,9 +53,9 @@ export class Tagger {
     //
 
     // registerTreeDataProvider will register the tree view the tagger instance and vscode
-    public registerTreeDataProvider(taggerTreeDataProvider: TaggerTreeDataProvider): void {
+    public registerTreeDataProvider(): void {
         
-        this.taggerTreeDataProvider = taggerTreeDataProvider;
+        this.taggerTreeDataProvider = new TaggerTreeDataProvider(this.settings.patterns);
 
         // Register the tree view with its data provider
         vscode.window.createTreeView('tagger-tags', {
@@ -59,13 +63,18 @@ export class Tagger {
         });
     }
 
+    // registerStatusBarItem will register the status bar item with the tagger instance and vscode
+    public registerStatusBarItem(): void {
+        this.statusBarItem = new StatusBarItem();
+    }
+
     // registerDecorator will register the decorator with the tagger instance
-    public registerDecorator(decorator: Decorator): void {
-        this.decorator = decorator;
+    public registerDecorator(): void {
+        this.decorator = new Decorator(this.settings.patterns);
     }
 
     // registerListeners will register the listen events with the tagger instance and vscode
-    public registerListeners(): void {      
+    public registerListeners(): void {
 
         if (this.settings.updateOn === "change") {
 
@@ -78,10 +87,11 @@ export class Tagger {
                     // Update tags for the file that changed
                     this.tags.updateForDocument(this.settings.patterns, event.document);
                     
-                    // Refresh the tree view
+                    // Refresh the activity and status bars
                     this.refreshActivityBar();
+                    this.refreshStatusBar();
                     
-                    // If the file tht changed is currently open, update the decorations too
+                    // If the file that changed is currently open, update the decorations too
                     if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
                         this.refreshDecorations();
                     }
@@ -103,14 +113,8 @@ export class Tagger {
             
                     // Update tags for the file that changed
                     if (await this.tags.updateForFile(this.settings.patterns, uri) >= 0) {
-                        
-                        // Refresh the tree view
                         this.refreshActivityBar();
-                        
-                        // If the file tht changed is currently open, update the decorations too
-                        if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
-                            this.refreshDecorations();
-                        }
+                        this.refreshStatusBar();
                     }
                 } else {
                     log.Event("fs change", `[skipped] ${uri.fsPath}`);
@@ -126,14 +130,8 @@ export class Tagger {
                 
                     // Update tags for the file that changed
                     if (await this.tags.updateForFile(this.settings.patterns, uri) > 0) {
-                        
-                        // Refresh the tree view
                         this.refreshActivityBar();
-                        
-                        // If the file tht changed is currently open, update the decorations too
-                        if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
-                            this.refreshDecorations();
-                        }
+                        this.refreshStatusBar();
                     }
                 } else {
                     log.Event("fs create", `[skipped] ${uri.fsPath}`);
@@ -149,14 +147,8 @@ export class Tagger {
                 
                     // Update tags for the file that changed
                     if (await this.tags.removeForFile(uri) > 0) {
-                        
-                        // Refresh the tree view
                         this.refreshActivityBar();
-                        
-                        // If the file tht changed is currently open, update the decorations too
-                        if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
-                            this.refreshDecorations();
-                        }
+                        this.refreshStatusBar();
                     }
                 } else {
                     log.Event("fs delete", `[skipped] ${uri.fsPath}`);   
@@ -197,9 +189,14 @@ export class Tagger {
 
     public registerCommands(): void {
 
-        // Refresh tree view
+        // Refresh activity bar
         this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshActivityBar', () => {
             this.refreshActivityBar();
+        }));
+
+        // Refresh status bar
+        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshStatusBar', () => {
+            this.refreshStatusBar();
         }));
         
         // Refresh decorations
@@ -239,6 +236,11 @@ export class Tagger {
     public refreshActivityBar() {
         this.taggerTreeDataProvider.refresh(this.tags.getTagsAsMap(this.settings.patterns));
     }
+    
+    // refreshStatusBar will update the tag count in the status bar
+    public refreshStatusBar(): void {
+        this.statusBarItem.refresh(this.tags.length);
+    }
 
     // refreshDecorations will decorate the active text editor using the latest tags
     public refreshDecorations(editors?: vscode.TextEditor[]): void {
@@ -259,6 +261,7 @@ export class Tagger {
     // refresh will perform a full update of all tags and refresh the tree view and decorations
     public refresh(): void {
         this.refreshActivityBar();
+        this.refreshStatusBar();
         this.refreshDecorations();
     }
 

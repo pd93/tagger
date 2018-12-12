@@ -27,7 +27,7 @@ export class Tags extends Array<Tag> {
     // update will update the entire list of tags from scratch
     public async update(patterns: Pattern[], include: string, exclude: string) {
 
-        log.Debug("Updating tags...");
+        log.Info("Updating tags...");
 
 		// Init
 		this.length = 0; // Clear the array
@@ -69,8 +69,10 @@ export class Tags extends Array<Tag> {
     // addForFile will add the tags for a given file
     public async addForFile(patterns: Pattern[], uri: vscode.Uri): Promise<number> {
         try {
-            let document = await vscode.workspace.openTextDocument(uri.fsPath);
-            return this.addForDocument(patterns, document);
+            let document: vscode.TextDocument = await vscode.workspace.openTextDocument(uri.fsPath);
+            let count: number = this.addForDocument(patterns, document);
+            log.Info(`${chalk.green(`+${count}`)} ${chalk.red("-0")}: ${uri.fsPath}`);
+            return count;
         } catch (err) {
             return -1;
         }
@@ -101,7 +103,7 @@ export class Tags extends Array<Tag> {
             this.sortTags();
         }
         
-        log.Info(`${chalk.red(`-${count}`)}: ${uri.fsPath}`);
+        log.Info(`${chalk.green("+0")} ${chalk.red(`-${count}`)}: ${uri.fsPath}`);
 
         return count;
     }
@@ -119,12 +121,14 @@ export class Tags extends Array<Tag> {
         if (sort) {
             this.sortTags();
         }
+        
+        log.Info(`${chalk.green(`+${added}`)} ${chalk.red(`-${removed}`)}: ${document.uri.fsPath}`);
 
         return added + removed;
     }
 
     // addForDocument will add all the tags for a given document
-    public addForDocument(patterns: Pattern[], document: vscode.TextDocument, sort: boolean = true): number {
+    private addForDocument(patterns: Pattern[], document: vscode.TextDocument, sort: boolean = true): number {
 
         // Init
         let count: number = 0;
@@ -155,14 +159,12 @@ export class Tags extends Array<Tag> {
         if (sort) {
             this.sortTags();
         }
-
-        log.Info(`${chalk.green(`+${count}`)}: ${document.uri.fsPath}`);
         
         return count;
     }
     
     // removeForDocument will remove all the tags for a given document
-    public removeForDocument(document: vscode.TextDocument, sort: boolean = true): number {
+    private removeForDocument(document: vscode.TextDocument, sort: boolean = true): number {
         
         // Init
         let count: number = 0;
@@ -185,8 +187,6 @@ export class Tags extends Array<Tag> {
         if (sort) {
             this.sortTags();
         }
-        
-        log.Info(`${chalk.red(`-${count}`)}: ${document.uri.fsPath}`);
 
         return count;
     }

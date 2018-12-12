@@ -26,7 +26,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 	// Refresh will the refresh the tree view
 	public refresh(tagMap: Map<string, Tags>): void {
 		
-		log.Refresh("activity bar", "");
+		log.Refresh("activity bar");
 		
 		this.tagMap = tagMap;
 		this._onDidChangeTreeData.fire();

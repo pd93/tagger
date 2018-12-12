@@ -40,6 +40,10 @@
                 "title": "Tagger: Refresh Activity Bar"
             },
             {
+                "command": "tagger.refreshStatusBar",
+                "title": "Tagger: Refresh Status Bar"
+            },
+            {
                 "command": "tagger.refreshDecorations",
                 "title": "Tagger: Refresh Decorations"
             },
