@@ -34,18 +34,18 @@ export class Tags extends Array<Tag> {
 		let skipped: number = 0;
 
 		// Get a list of files in the workspace
-		let files = await vscode.workspace.findFiles(include, exclude);
+		let uris = await vscode.workspace.findFiles(include, exclude);
 
-		log.Info(`Found ${files.length} file${files.length === 1 ? "" : "s"} in the workspace`);
+		log.Info(`Found ${uris.length} file${uris.length === 1 ? "" : "s"} in the workspace`);
 
 		// Loop through the files
-		for (let file of files) {
+		for (let uri of uris) {
 
             // Update the tags
-            let fileUpdated = await this.updateForFile(patterns, file, false);
+            let count = await this.updateForFile(patterns, uri, false);
 
             // If the file was skipped, increment the counter
-            if (!fileUpdated) {
+            if (count < 0) {
                 skipped++;
             }
         }
