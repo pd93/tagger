@@ -11,7 +11,7 @@
   - Delete tag
   - Refresh
   - Refresh Decoration
-  - Refresh Tree View
+  - Refresh Activity Bar
 - Added the ability to hot reload the `settings.json` file
 - Added overrides for appropriate pattern settings.
 - Added support for regular expression flags

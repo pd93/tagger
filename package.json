@@ -36,8 +36,8 @@
     "contributes": {
         "commands": [
             {
-                "command": "tagger.refreshTreeView",
-                "title": "Tagger: Refresh Tree View"
+                "command": "tagger.refreshActivityBar",
+                "title": "Tagger: Refresh Activity Bar"
             },
             {
                 "command": "tagger.refreshDecorations",

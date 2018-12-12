@@ -79,7 +79,7 @@ export class Tagger {
                     this.tags.updateForDocument(this.settings.patterns, event.document);
                     
                     // Refresh the tree view
-                    this.refreshTreeView();
+                    this.refreshActivityBar();
                     
                     // If the file tht changed is currently open, update the decorations too
                     if (vscode.window.activeTextEditor && event.document === vscode.window.activeTextEditor.document) {
@@ -105,7 +105,7 @@ export class Tagger {
                     if (await this.tags.updateForFile(this.settings.patterns, uri) >= 0) {
                         
                         // Refresh the tree view
-                        this.refreshTreeView();
+                        this.refreshActivityBar();
                         
                         // If the file tht changed is currently open, update the decorations too
                         if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
@@ -128,7 +128,7 @@ export class Tagger {
                     if (await this.tags.updateForFile(this.settings.patterns, uri) > 0) {
                         
                         // Refresh the tree view
-                        this.refreshTreeView();
+                        this.refreshActivityBar();
                         
                         // If the file tht changed is currently open, update the decorations too
                         if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
@@ -151,7 +151,7 @@ export class Tagger {
                     if (await this.tags.removeForFile(uri) > 0) {
                         
                         // Refresh the tree view
-                        this.refreshTreeView();
+                        this.refreshActivityBar();
                         
                         // If the file tht changed is currently open, update the decorations too
                         if (vscode.window.activeTextEditor && uri.fsPath === vscode.window.activeTextEditor.document.fileName) {
@@ -198,8 +198,8 @@ export class Tagger {
     public registerCommands(): void {
 
         // Refresh tree view
-        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshTreeView', () => {
-            this.refreshTreeView();
+        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshActivityBar', () => {
+            this.refreshActivityBar();
         }));
         
         // Refresh decorations
@@ -235,8 +235,8 @@ export class Tagger {
     // Commands
     //
 
-    // refreshTreeView will populate the tree view using the latest tags
-    public refreshTreeView() {
+    // refreshActivityBar will populate the tree view using the latest tags
+    public refreshActivityBar() {
         this.taggerTreeDataProvider.refresh(this.tags.getTagsAsMap(this.settings.patterns));
     }
 
@@ -258,7 +258,7 @@ export class Tagger {
     
     // refresh will perform a full update of all tags and refresh the tree view and decorations
     public refresh(): void {
-        this.refreshTreeView();
+        this.refreshActivityBar();
         this.refreshDecorations();
     }
 

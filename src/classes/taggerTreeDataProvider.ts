@@ -26,7 +26,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 	// Refresh will the refresh the tree view
 	public refresh(tagMap: Map<string, Tags>): void {
 		
-		log.Refresh("tree view", "");
+		log.Refresh("activity bar", "");
 		
 		this.tagMap = tagMap;
 		this._onDidChangeTreeData.fire();
@@ -58,7 +58,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 	// GetPatternTreeItems returns a list of TaggerTreeItems containing patterns
 	private getPatternTreeItems(): TaggerTreeItem[] {
 
-		log.Debug("Getting patterns as TreeItems...");
+		log.Debug("Getting pattern tree items...");
 
 		// Init
 		let patternTreeItems: TaggerTreeItem[] = [];
@@ -85,7 +85,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 	// GetTagTreeItems returns a list of TaggerTreeItems containing tags for a parent pattern
     private getTagTreeItems(pattern: Pattern): TaggerTreeItem[] {
 
-		log.Debug(`Getting tags as TreeItems for pattern: '${pattern.name}'...`);
+		log.Debug(`Getting tags tree items for pattern: '${pattern.name}'...`);
 
 		// Init
 		let tagTreeItems: TaggerTreeItem[] = [];

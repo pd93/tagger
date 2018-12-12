@@ -3,7 +3,7 @@
 This is a list of planned features:
 
 - Commands / Buttons:
-  - Collapse tree view
+  - Collapse activity bar tree
   - Toggle decorations
   - Search
   - Sort

@@ -20,7 +20,7 @@ export class Decorator {
     // refresh will decorate the active text editor by highlighting tags
     public refresh(editor: vscode.TextEditor, tags: Map<string, Tags>): void {
 
-        log.Refresh("decorations", `${editor.document.uri.fsPath} ---`);
+        log.Refresh("decorations", `${editor.document.uri.fsPath}`);
 
         // Init
         let ranges: vscode.Range[];

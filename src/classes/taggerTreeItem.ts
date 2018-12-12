@@ -17,7 +17,7 @@ export class TaggerTreeItem extends vscode.TreeItem {
 	) {
 		super(label, collapsibleState);
 
-		log.Debug(`- Creating TaggerTreeItem of type '${this.type}'...`);
+		log.Debug(`- Creating ${this.type} tree item...`);
 
 		// Ensure type is valid
 		if (this.type !== "tag" && this.type !== "pattern") {

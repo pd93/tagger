@@ -50,7 +50,7 @@ export class Tags extends Array<Tag> {
             }
         }
 
-		log.Info(`Found ${this.length} tag${this.length === 1 ? "" : "s"} in ${files.length-skipped} files (skipped ${skipped} files)`);
+		log.Info(`Found ${this.length} tag${this.length === 1 ? "" : "s"} in ${uris.length-skipped} files (skipped ${skipped} files)`);
         
         // Sort the tags
         this.sortTags();
