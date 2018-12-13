@@ -19,15 +19,20 @@ export class Tag {
     // pretty will return the pretty tag text (concatenated from the capture groups)
     public pretty() {
 
+        let text: string;
+
         // If there are capture groups
         if (this.groups.length > 0) {
 
             // Join and return them
-            return this.groups.join(" ").trim();
+            text = this.groups.join(" ").trim();
+
+        } else {
+            text = this.text.trim();
         }
 
         // Otherwise, return the full text
-        return this.text.trim();
+        return text !== "" ? text : "?";
     }
 
     // tooltip will return a tooltip string

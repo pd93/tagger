@@ -1,6 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import * as path from 'path';
 import * as log from '../utils/log';
 import { Tags, Pattern, TaggerTreeItem } from './';
 
@@ -73,7 +74,8 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 			// Create the tree item
 			patternTreeItems.push(new TaggerTreeItem(
 				"pattern",
-				`<strong>${pattern.name.toUpperCase()}</strong> (${count})`,
+				pattern.name.toUpperCase(),
+				`(${count})`,
 				vscode.TreeItemCollapsibleState.Expanded,
 				pattern
 			));
@@ -97,6 +99,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 			tagTreeItems.push(new TaggerTreeItem(
 				"tag",
 				tag.pretty(),
+				path.basename(tag.filepath),
 				vscode.TreeItemCollapsibleState.None,
 				pattern,
 				tag,

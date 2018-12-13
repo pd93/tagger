@@ -10,6 +10,7 @@ export class TaggerTreeItem extends vscode.TreeItem {
 	constructor(
 		public readonly type: string,
 		public readonly label: string,
+		public readonly description: string,
 		public readonly collapsibleState: vscode.TreeItemCollapsibleState,
 		public readonly pattern: Pattern,
 		public readonly tag?: Tag,
