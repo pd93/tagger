@@ -1,8 +1,8 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as minimatch from 'minimatch';
-import * as log from '../utils/log';
+import * as log from '../log';
+import * as utils from '../utils';
 import { Tag, Tags, Pattern, ActivityBar, TreeItem, Decorator, StatusBar, Settings } from './';
 
 export class Tagger {
@@ -74,7 +74,7 @@ export class Tagger {
 
             vscode.workspace.onDidChangeTextDocument(event => {
 
-                if (this.shouldSearchDocument(event.document)) {
+                if (utils.shouldSearchDocument(event.document, this.settings.exclude)) {
 
                     log.Event("doc change", event.document.uri.fsPath);
                     
@@ -101,14 +101,17 @@ export class Tagger {
             // When a file on the system is changed
             this.watcher.onDidChange(async uri => {
                 
-                if (this.shouldSearchFile(uri)) {
-    
-                    log.Event("fs change", uri.fsPath);
-            
+                if (utils.shouldSearchFile(uri, this.settings.exclude)) {
+                    
                     // Update tags for the file that changed
                     if (await this.tags.updateForFile(this.settings.patterns, uri) >= 0) {
+        
+                        log.Event("fs change", uri.fsPath);
+
                         this.refreshActivityBar();
                         this.refreshStatusBar();
+                    } else {
+                        log.Event("fs change", `[failed] ${uri.fsPath}`);
                     }
                 } else {
                     log.Event("fs change", `[skipped] ${uri.fsPath}`);
@@ -118,14 +121,17 @@ export class Tagger {
             // When a file on the system is created
             this.watcher.onDidCreate(async uri => {
 
-                if (this.shouldSearchFile(uri)) {
-    
-                    log.Event("fs create", uri.fsPath);
-                
+                if (utils.shouldSearchFile(uri, this.settings.exclude)) {
+                    
                     // Update tags for the file that changed
                     if (await this.tags.updateForFile(this.settings.patterns, uri) > 0) {
+        
+                        log.Event("fs create", uri.fsPath);
+
                         this.refreshActivityBar();
                         this.refreshStatusBar();
+                    } else {
+                        log.Event("fs create", `[failed] ${uri.fsPath}`);
                     }
                 } else {
                     log.Event("fs create", `[skipped] ${uri.fsPath}`);
@@ -135,14 +141,17 @@ export class Tagger {
             // When a file on the system is deleted
             this.watcher.onDidDelete(async uri => {
 
-                if (this.shouldSearchFile(uri)) {
-    
-                    log.Event("fs delete", uri.fsPath);
-                
+                if (utils.shouldSearchFile(uri, this.settings.exclude)) {
+                    
                     // Update tags for the file that changed
                     if (await this.tags.removeForFile(uri) > 0) {
+        
+                        log.Event("fs delete", uri.fsPath);
+
                         this.refreshActivityBar();
                         this.refreshStatusBar();
+                    } else {
+                        log.Event("fs delete", `[failed] ${uri.fsPath}`);
                     }
                 } else {
                     log.Event("fs delete", `[skipped] ${uri.fsPath}`);   
@@ -246,7 +255,7 @@ export class Tagger {
         
         // Loop through the editors and refresh them
         for (let editor of editors) {
-            if (this.shouldSearchDocument(editor.document)) {
+            if (utils.shouldSearchDocument(editor.document, this.settings.exclude)) {
                 this.decorator.refresh(editor, this.tags.getTagsAsMap(this.settings.patterns, editor.document));
             }
         }
@@ -386,16 +395,5 @@ export class Tagger {
         } catch (err) {
             log.Error(err);
         }
-    }
-    
-    // shouldSearchDocument returns whether or not tagger should search for tags in a given file
-    private shouldSearchFile(uri: vscode.Uri) {
-        let excludeRegExp: RegExp = new RegExp(/^(?:\\\d+\\.*|.*settings.json)$/);
-        return !excludeRegExp.test(uri.fsPath) && minimatch.match([uri.fsPath], this.settings.exclude).length === 0;
-    }
-
-    // shouldSearchDocument returns whether or not tagger should search for tags in a given document
-    private shouldSearchDocument(document: vscode.TextDocument) {
-        return !document.isUntitled && this.shouldSearchFile(document.uri);
     }
 }

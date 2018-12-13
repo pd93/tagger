@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as log from '../utils/log';
+import * as log from '../log';
 import { Pattern, Tags } from './';
 
 export class Decorator {

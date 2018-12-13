@@ -2,7 +2,8 @@
 
 import * as vscode from 'vscode';
 import chalk from 'chalk';
-import * as log from '../utils/log';
+import * as log from '../log';
+import * as utils from '../utils';
 import { Pattern, Tag } from './';
 
 export class Tags extends Array<Tag> { 
@@ -32,25 +33,35 @@ export class Tags extends Array<Tag> {
 		// Init
 		this.length = 0; // Clear the array
 		let skipped: number = 0;
+		let failed: number = 0;
 
 		// Get a list of files in the workspace
-		let uris = await vscode.workspace.findFiles(include, exclude);
-
-		log.Info(`Found ${uris.length} file${uris.length === 1 ? "" : "s"} in the workspace`);
+        let uris = await vscode.workspace.findFiles("**/*");
+        
+        let pluralFiles = uris.length === 1 ? "" : "s";
+		log.Info(`Found ${uris.length} file${pluralFiles} in the workspace`);
 
 		// Loop through the files
 		for (let uri of uris) {
 
-            // Update the tags
-            let count = await this.updateForFile(patterns, uri, false);
+            // Make sure it's not a config file
+            if (utils.shouldSearchFile(uri, exclude)) {
 
-            // If the file was skipped, increment the counter
-            if (count < 0) {
+                // Update the tags
+                let count = await this.updateForFile(patterns, uri, false);
+
+                // If it failed to open the file, increment the counter
+                if (count < 0) {
+                    failed++;
+                }
+            } else {
                 skipped++;
             }
         }
 
-		log.Info(`Found ${this.length} tag${this.length === 1 ? "" : "s"} in ${uris.length-skipped} files (skipped ${skipped} files)`);
+        pluralFiles = uris.length-skipped-failed === 1 ? "" : "s";
+        let pluralTags = this.length === 1 ? "" : "s";
+		log.Info(`Found ${this.length} tag${pluralTags} in ${uris.length-skipped-failed} files${pluralFiles} (skipped: ${skipped}, failed: ${failed})`);
         
         // Sort the tags
         this.sortTags();
@@ -59,7 +70,7 @@ export class Tags extends Array<Tag> {
     // updateForFile will remove and re-add the tags for a given file
     public async updateForFile(patterns: Pattern[], uri: vscode.Uri, sort: boolean = true): Promise<number> {
         try {
-            let document: vscode.TextDocument = await this.getDocument(uri);
+            let document: vscode.TextDocument = await vscode.workspace.openTextDocument(uri.fsPath);
             return this.updateForDocument(patterns, document, sort);
         } catch (err) {
             return -1;
@@ -234,26 +245,5 @@ export class Tags extends Array<Tag> {
         }
 
         return tagMap;
-    }
-
-    //
-    // Helpers
-    //
-
-    // 
-    private async getDocument(uri: vscode.Uri): Promise<vscode.TextDocument> {
-
-        try {
-
-            // Get the file as a TextDocument
-            return await vscode.workspace.openTextDocument(uri.fsPath);
-
-        } catch (err) {
-
-            // If there's a problem reading the file, skip it and return false
-            log.Info(`[Skipping] file: '${uri.fsPath}'...`);
-
-            return Promise.reject(err);
-        }
     }
 }

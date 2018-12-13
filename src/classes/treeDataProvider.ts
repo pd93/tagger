@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as log from '../utils/log';
+import * as log from '../log';
 import { Tags, Pattern, TreeItem } from './';
 
 // TreeDataProvider will provide data to the tag view in the tagger activity tab

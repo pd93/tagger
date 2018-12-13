@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as log from '../utils/log';
+import * as log from '../log';
 import * as fs from 'fs';
 
 export class Tag {

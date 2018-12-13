@@ -1,7 +1,7 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as log from '../utils/log';
+import * as log from '../log';
 import { Pattern, Tag } from './';
 
 // TreeItem corresponds to a single tag item listed in the TagTree
