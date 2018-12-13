@@ -4,8 +4,8 @@ import * as vscode from 'vscode';
 import * as log from '../utils/log';
 import { Pattern, Tag } from './';
 
-// TaggerTreeItem corresponds to a single tag item listed in the TagTree
-export class TaggerTreeItem extends vscode.TreeItem {
+// TreeItem corresponds to a single tag item listed in the TagTree
+export class TreeItem extends vscode.TreeItem {
 
 	constructor(
 		public readonly type: string,
@@ -27,12 +27,12 @@ export class TaggerTreeItem extends vscode.TreeItem {
 
 		// Ensure that if the type is 'pattern', a pattern is set
 		if (this.type === "pattern" && !this.pattern) {
-			throw new Error("No pattern given for TaggerTreeItem with type: 'pattern'");
+			throw new Error("No pattern given for TreeItem with type: 'pattern'");
 		}
 		
 		// Ensure that if the type is 'tag', a tag is set
 		if (this.type === "tag" && !this.tag) {
-			throw new Error("No tag given for TaggerTreeItem with type: 'tag'");
+			throw new Error("No tag given for TreeItem with type: 'tag'");
 		}
 		
 		// If the tree item is a 'tag', set the icon

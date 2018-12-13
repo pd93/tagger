@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import * as minimatch from 'minimatch';
 import * as log from '../utils/log';
-import { Tag, Tags, Pattern, TaggerTreeDataProvider, TaggerTreeItem, Decorator, StatusBarItem, Settings } from './';
+import { Tag, Tags, Pattern, ActivityBar, TreeItem, Decorator, StatusBar, Settings } from './';
 
 export class Tagger {
 
@@ -20,10 +20,10 @@ export class Tagger {
         this.watcher = vscode.workspace.createFileSystemWatcher(this.settings.include);
 
         // Register a tree view
-        this.registerTreeDataProvider();
+        this.registerActivityBar();
 
         // Register a status bar item
-        this.registerStatusBarItem();
+        this.registerStatusBar();
 
         // Register a decorator
         this.registerDecorator();
@@ -43,8 +43,8 @@ export class Tagger {
     // Variables
     public settings: Settings;
     public tags: Tags = new Tags();
-    private taggerTreeDataProvider!: TaggerTreeDataProvider;
-    private statusBarItem!: StatusBarItem;
+    private activityBar!: ActivityBar;
+    private statusBar!: StatusBar;
     private decorator!: Decorator;
     private watcher: vscode.FileSystemWatcher;
 
@@ -52,20 +52,14 @@ export class Tagger {
     // Registrars
     //
 
-    // registerTreeDataProvider will register the tree view the tagger instance and vscode
-    public registerTreeDataProvider(): void {
-        
-        this.taggerTreeDataProvider = new TaggerTreeDataProvider(this.settings.patterns);
-
-        // Register the tree view with its data provider
-        vscode.window.createTreeView('tagger-tags', {
-            treeDataProvider: this.taggerTreeDataProvider
-        });
+    // registerActivityBar will register the tree view the tagger instance and vscode
+    public registerActivityBar(): void {
+        this.activityBar = new ActivityBar(this.settings.patterns);
     }
 
-    // registerStatusBarItem will register the status bar item with the tagger instance and vscode
-    public registerStatusBarItem(): void {
-        this.statusBarItem = new StatusBarItem();
+    // registerStatusBar will register the status bar item with the tagger instance and vscode
+    public registerStatusBar(): void {
+        this.statusBar = new StatusBar();
     }
 
     // registerDecorator will register the decorator with the tagger instance
@@ -177,7 +171,7 @@ export class Tagger {
 
                 // Send the new patterns to the decorator and tree view
                 this.decorator.setPatterns(this.settings.patterns);
-                this.taggerTreeDataProvider.setPatterns(this.settings.patterns);
+                this.activityBar.setPatterns(this.settings.patterns);
 
                 // Refresh everything
                 this.update().then(() => {
@@ -212,9 +206,9 @@ export class Tagger {
         }));
         
         // Navigate to a tag
-        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.goToTag', (taggerTreeItem?: TaggerTreeItem, tag?: Tag) => {
-            if (taggerTreeItem && taggerTreeItem.tag) {
-                this.goToTag(taggerTreeItem.tag, false);
+        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.goToTag', (treeItem?: TreeItem, tag?: Tag) => {
+            if (treeItem && treeItem.tag) {
+                this.goToTag(treeItem.tag, false);
             } else if (tag) {
                 this.goToTag(tag);
             } else {
@@ -223,8 +217,8 @@ export class Tagger {
         }));
         
         // Delete a tag
-        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.deleteTag', (taggerTreeItem?: TaggerTreeItem) => {
-            this.deleteTag(taggerTreeItem ? taggerTreeItem.tag : undefined);
+        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.deleteTag', (treeItem?: TreeItem) => {
+            this.deleteTag(treeItem ? treeItem.tag : undefined);
         }));
     }
     
@@ -234,12 +228,12 @@ export class Tagger {
 
     // refreshActivityBar will populate the tree view using the latest tags
     public refreshActivityBar() {
-        this.taggerTreeDataProvider.refresh(this.tags.getTagsAsMap(this.settings.patterns));
+        this.activityBar.refresh(this.tags.getTagsAsMap(this.settings.patterns));
     }
     
     // refreshStatusBar will update the tag count in the status bar
     public refreshStatusBar(): void {
-        this.statusBarItem.refresh(this.tags.length);
+        this.statusBar.refresh(this.tags.length);
     }
 
     // refreshDecorations will decorate the active text editor using the latest tags

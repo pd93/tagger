@@ -3,10 +3,10 @@
 import * as vscode from 'vscode';
 import * as log from '../utils/log';
 
-export class StatusBarItem {
+export class StatusBar {
 
     constructor() {
-        log.Info("Creating StatusBarItem...");
+        log.Info("Creating StatusBar...");
     }
 
     // refresh will update the tag count displayed in the status bar
@@ -17,4 +17,3 @@ export class StatusBarItem {
         vscode.window.setStatusBarMessage(`$(tag) ${count}`);
     }
 }
-

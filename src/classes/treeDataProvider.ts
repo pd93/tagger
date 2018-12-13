@@ -3,21 +3,21 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as log from '../utils/log';
-import { Tags, Pattern, TaggerTreeItem } from './';
+import { Tags, Pattern, TreeItem } from './';
 
-// TaggerTreeDataProvide will provide data to the tag view in the tagger activity tab
-export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTreeItem> {
+// TreeDataProvider will provide data to the tag view in the tagger activity tab
+export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	constructor(
 		private patterns: Pattern[],
 		private tagMap: Map<string, Tags> = new Map()
 	) {
-		log.Info("Creating TagTreeDataProvider...");
+		log.Info("Creating TreeDataProvider...");
     }
 
 	// Variables
-    private _onDidChangeTreeData: vscode.EventEmitter<TaggerTreeItem | undefined> = new vscode.EventEmitter<TaggerTreeItem | undefined>();
-	readonly onDidChangeTreeData: vscode.Event<TaggerTreeItem | undefined> = this._onDidChangeTreeData.event;
+    private _onDidChangeTreeData: vscode.EventEmitter<TreeItem | undefined> = new vscode.EventEmitter<TreeItem | undefined>();
+	readonly onDidChangeTreeData: vscode.Event<TreeItem | undefined> = this._onDidChangeTreeData.event;
 
     // setPatterns will set the patterns variable
     public setPatterns(patterns: Pattern[]): void {
@@ -34,12 +34,12 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 	}
 
 	// GetTreeItem ...
-	public getTreeItem(element: TaggerTreeItem): vscode.TreeItem {
+	public getTreeItem(element: TreeItem): vscode.TreeItem {
 		return element;
     }
 	
 	// GetChildren ...
-    public getChildren(parent?: TaggerTreeItem): Thenable<TaggerTreeItem[]> {
+    public getChildren(parent?: TreeItem): Thenable<TreeItem[]> {
 		
 		// If there is a parent, then we need to return tags
 		if (parent && parent.pattern) {
@@ -56,13 +56,13 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 	// Helpers
 	//
 
-	// GetPatternTreeItems returns a list of TaggerTreeItems containing patterns
-	private getPatternTreeItems(): TaggerTreeItem[] {
+	// GetPatternTreeItems returns a list of TreeItems containing patterns
+	private getPatternTreeItems(): TreeItem[] {
 
 		log.Debug("Getting pattern tree items...");
 
 		// Init
-		let patternTreeItems: TaggerTreeItem[] = [];
+		let patternTreeItems: TreeItem[] = [];
 		let count: number;
 
 		// Loop through the patterns
@@ -72,7 +72,7 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 			count = (this.tagMap.get(pattern.name) || new Tags()).length;
 
 			// Create the tree item
-			patternTreeItems.push(new TaggerTreeItem(
+			patternTreeItems.push(new TreeItem(
 				"pattern",
 				pattern.name.toUpperCase(),
 				`(${count})`,
@@ -84,19 +84,19 @@ export class TaggerTreeDataProvider implements vscode.TreeDataProvider<TaggerTre
 		return patternTreeItems;
 	}
 
-	// GetTagTreeItems returns a list of TaggerTreeItems containing tags for a parent pattern
-    private getTagTreeItems(pattern: Pattern): TaggerTreeItem[] {
+	// GetTagTreeItems returns a list of TreeItems containing tags for a parent pattern
+    private getTagTreeItems(pattern: Pattern): TreeItem[] {
 
 		log.Debug(`Getting tags tree items for pattern: '${pattern.name}'...`);
 
 		// Init
-		let tagTreeItems: TaggerTreeItem[] = [];
+		let tagTreeItems: TreeItem[] = [];
 		
 		// Loop through the tags
 		for (let tag of this.tagMap.get(pattern.name) || []) {
 
 			// Create the tree item
-			tagTreeItems.push(new TaggerTreeItem(
+			tagTreeItems.push(new TreeItem(
 				"tag",
 				tag.pretty(),
 				path.basename(tag.filepath),
