@@ -14,7 +14,7 @@ An extension for [Visual Studio Code](https://code.visualstudio.com) to browse, 
 
 - Regex pattern matching (with flags)
 - Tag browser
-- Tags highlighting
+- Tag highlighting
 - Commands
   - Go to tag(s)
   - Delete tag(s)
@@ -98,7 +98,7 @@ You may define as many patterns as you like, but each pattern **must** contain a
 
 Tagger has support for multi-line highlighting, so you can use new line characters in your patterns (see `multiline` pattern).
 
-You can format the text that is displayed for the tag by using [capture groups](). For example, the `todo` and `issue` patterns both have the capture group: `(.*)`. This will means that only the text in this group will be displayed. The `issue` tag has an additional capture group: `(#\\d+)`. When multiple capture groups are defined, they are concatenated with a single space as a separator. To use brackets without capturing text, you can use the non-capture group syntax `(?:)`.
+You can format the text that is displayed for the tag by using [capture groups](https://www.regular-expressions.info/refcapture.html). For example, the `todo` and `issue` patterns both have the capture group: `(.*)`. This will means that only the text in this group will be displayed. The `issue` tag has an additional capture group: `(#\\d+)`. When multiple capture groups are defined, they are concatenated with a single space as a separator. To use brackets without capturing text, you can use the non-capture group syntax `(?:)`.
 
 ```json
 {
