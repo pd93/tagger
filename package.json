@@ -134,7 +134,7 @@
                         },
                         "exclude": {
                             "type": "string",
-                            "default": "**/node_modules/*",
+                            "default": "**/{node_modules,vendor}/*",
                             "description": "Glob pattern for files to exclude when searching for tags."
                         },
                         "goToBehaviour": {

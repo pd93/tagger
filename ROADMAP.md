@@ -6,9 +6,6 @@
   - Toggle decorations
   - Search
   - Sort
-- Settings:
-  - `languages: string[] (default=*)` - Only match tags in files with a given language ID(s)
-  - Array support for include/exclude
 
 ## Backlog
 

@@ -6,24 +6,20 @@ import * as log from '../log';
 import * as utils from '../utils';
 import { Pattern, Tag } from './';
 
-export class Tags extends Array<Tag> { 
-    
-    //
-    // Sort
-    //
+export class Tags extends Array<Tag> {
 
-    // sortTags will sort the tag array alphabetically
-    public sortTags() {
-        this.sort((a: Tag, b: Tag) => {
-            let pa = a.pretty();
-            let pb = b.pretty();
-            return pa > pb ? 1 : (pa < pb ? -1 : 0);
-        });
+    constructor(
+        patterns?: Pattern[],
+        include?: string,
+        exclude?: string
+    ) {
+        super();
+
+        // If settings provided, update the tags
+        if (patterns && include && exclude) {
+            this.update(patterns, include, exclude);
+        }
     }
-
-    //
-    // Update
-    //
 
     // update will update the entire list of tags from scratch
     public async update(patterns: Pattern[], include: string, exclude: string) {
@@ -45,7 +41,7 @@ export class Tags extends Array<Tag> {
 		for (let uri of uris) {
 
             // Make sure it's not a config file
-            if (utils.shouldSearchFile(uri, exclude)) {
+            if (utils.shouldSearchFile(uri, include, exclude)) {
 
                 // Update the tags
                 let count = await this.updateForFile(patterns, uri, false);
@@ -61,7 +57,7 @@ export class Tags extends Array<Tag> {
 
         pluralFiles = uris.length-skipped-failed === 1 ? "" : "s";
         let pluralTags = this.length === 1 ? "" : "s";
-		log.Info(`Found ${this.length} tag${pluralTags} in ${uris.length-skipped-failed} files${pluralFiles} (skipped: ${skipped}, failed: ${failed})`);
+		log.Info(`Found ${this.length} tag${pluralTags} in ${uris.length-skipped-failed} file${pluralFiles} (skipped: ${skipped}, failed: ${failed})`);
         
         // Sort the tags
         this.sortTags();
@@ -200,6 +196,19 @@ export class Tags extends Array<Tag> {
         }
 
         return count;
+    }
+    
+    //
+    // Sort
+    //
+
+    // sortTags will sort the tag array alphabetically
+    public sortTags() {
+        this.sort((a: Tag, b: Tag) => {
+            let pa = a.pretty();
+            let pb = b.pretty();
+            return pa > pb ? 1 : (pa < pb ? -1 : 0);
+        });
     }
     
     //

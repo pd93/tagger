@@ -23,7 +23,7 @@ An extension for [Visual Studio Code](https://code.visualstudio.com) to browse, 
 
 ### `updateOn: string` - Whether tagger should update tags when a file is changed or when it is saved.
 
-This should be set to either `change` (default), `save` or `manual`. When set to `manual`, you will need to update the tags using the `refresh` command (`F1 > "Tagger: Refresh"`) or by pushing the refresh button. Setting `updateOn` to `change` or `save` will update the tags when a file is changed or saved respectively.
+This should be set to either `change` (default), `save` or `manual`. When set to `manual`, you will need to update the tags using the `refresh` command (`F1 > "Tagger: Refresh"`) or by pushing the refresh button at the top of the activity bar. Setting `updateOn` to `change` or `save` will update the tags when a file is changed or saved respectively.
 
 ---
 
@@ -35,9 +35,9 @@ Files that match this pattern will be searched for tags. The default pattern is 
 
 ### `exclude: string` - Glob pattern for files to exclude when searching for tags.
 
-Same as `include`, but files that match this pattern will **not** be searched for tags. The default value is `**/node_modules/*` which will stop Tagger from searching node dependencies for tags.
+Same as `include`, but files that match this pattern will **not** be searched for tags. The default value is `**/{node_modules,vendor}/*` which will stop Tagger from searching node or golang dependencies for tags.
 
-If a file is matched by `include` *and* `exclude`, it will not be searched. 
+Files matched by `include` *and* `exclude` will not be searched. 
 
 You do not need to exclude binary files as Tagger does this for you.
 
@@ -46,6 +46,8 @@ You do not need to exclude binary files as Tagger does this for you.
 ### `goToBehavior: string` - Set the cursor behaviour when navigating to a tag.
 
 This should be set to either `start`, `end` (default) or `highlight`. When you navigate to a tag and `goToBehaviour` is set to `start` or `end` the cursor will move the start or end of the tag respectively. When set to `highlight` the tag text will be highlighted.
+
+---
 
 ### `statusBar: Object - Status bar settings.`
 
@@ -105,13 +107,14 @@ You can format the text that is displayed for the tag by using [capture groups](
     "tagger": {
         "updateOn": "change",
         "include": "**/*",
-        "exclude": "**/node_modules/*",
+        "exclude": "**/{node_modules,vendor}/*",
         "goToBehaviour": "highlight",
         "statusBar": {
             "enabled": true,
             "output": "$(tag) {all}  $(check) {todo}  $(bug) {issue}"
         },
         "defaultPattern": {
+            "flags": "g",
             "style": {
                 "color": "#FFF",
                 "backgroundColor": "#CF3F61",

@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import * as log from '../log';
 import * as utils from '../utils';
-import { Tag, Tags, Pattern, ActivityBar, TreeItem, Decorator, StatusBar, Settings } from './';
+import { Tag, Tags, Pattern, Patterns, ActivityBar, TreeItem, Decorator, StatusBar, Settings } from './';
 
 export class Tagger {
 
@@ -15,6 +15,8 @@ export class Tagger {
 
         // Get the tagger settings
         this.settings = new Settings();
+        this.patterns = new Patterns();
+        this.tags = new Tags();
 
         // Create a filesystem watcher
         this.watcher = vscode.workspace.createFileSystemWatcher(this.settings.include);
@@ -41,8 +43,9 @@ export class Tagger {
     }
 
     // Variables
-    public settings: Settings;
-    public tags: Tags = new Tags();
+    private settings: Settings;
+    private tags: Tags;
+    private patterns: Patterns;
     private activityBar!: ActivityBar;
     private statusBar!: StatusBar;
     private decorator!: Decorator;
@@ -54,7 +57,7 @@ export class Tagger {
 
     // registerActivityBar will register the tree view the tagger instance and vscode
     public registerActivityBar(): void {
-        this.activityBar = new ActivityBar(this.settings.patterns);
+        this.activityBar = new ActivityBar(this.patterns);
     }
 
     // registerStatusBar will register the status bar item with the tagger instance and vscode
@@ -64,7 +67,7 @@ export class Tagger {
 
     // registerDecorator will register the decorator with the tagger instance
     public registerDecorator(): void {
-        this.decorator = new Decorator(this.settings.patterns);
+        this.decorator = new Decorator(this.patterns);
     }
 
     // registerListeners will register the listen events with the tagger instance and vscode
@@ -74,12 +77,12 @@ export class Tagger {
 
             vscode.workspace.onDidChangeTextDocument(event => {
 
-                if (utils.shouldSearchDocument(event.document, this.settings.exclude)) {
+                if (utils.shouldSearchDocument(event.document, this.settings.include, this.settings.exclude)) {
 
                     log.Event("doc change", event.document.uri.fsPath);
                     
                     // Update tags for the file that changed
-                    this.tags.updateForDocument(this.settings.patterns, event.document);
+                    this.tags.updateForDocument(this.patterns, event.document);
                     
                     // Refresh the activity and status bars
                     this.refreshActivityBar();
@@ -101,10 +104,10 @@ export class Tagger {
             // When a file on the system is changed
             this.watcher.onDidChange(async uri => {
                 
-                if (utils.shouldSearchFile(uri, this.settings.exclude)) {
+                if (utils.shouldSearchFile(uri, this.settings.include, this.settings.exclude)) {
                     
                     // Update tags for the file that changed
-                    if (await this.tags.updateForFile(this.settings.patterns, uri) >= 0) {
+                    if (await this.tags.updateForFile(this.patterns, uri) >= 0) {
         
                         log.Event("fs change", uri.fsPath);
 
@@ -121,10 +124,10 @@ export class Tagger {
             // When a file on the system is created
             this.watcher.onDidCreate(async uri => {
 
-                if (utils.shouldSearchFile(uri, this.settings.exclude)) {
+                if (utils.shouldSearchFile(uri, this.settings.include, this.settings.exclude)) {
                     
                     // Update tags for the file that changed
-                    if (await this.tags.updateForFile(this.settings.patterns, uri) > 0) {
+                    if (await this.tags.updateForFile(this.patterns, uri) > 0) {
         
                         log.Event("fs create", uri.fsPath);
 
@@ -141,7 +144,7 @@ export class Tagger {
             // When a file on the system is deleted
             this.watcher.onDidDelete(async uri => {
 
-                if (utils.shouldSearchFile(uri, this.settings.exclude)) {
+                if (utils.shouldSearchFile(uri, this.settings.include, this.settings.exclude)) {
                     
                     // Update tags for the file that changed
                     if (await this.tags.removeForFile(uri) > 0) {
@@ -178,12 +181,14 @@ export class Tagger {
                 // Update the settings
                 this.settings.update();
 
-                // Send the new patterns to the decorator and tree view
-                this.decorator.setPatterns(this.settings.patterns);
-                this.activityBar.setPatterns(this.settings.patterns);
-
-                // Refresh everything
+                // Update patterns and tags
                 this.update().then(() => {
+                    
+                    // Send the new patterns to the decorator and tree view
+                    this.decorator.setPatterns(this.patterns);
+                    this.activityBar.setPatterns(this.patterns);
+
+                    // Refresh the views
                     this.refresh();
                 });
             }
@@ -237,12 +242,12 @@ export class Tagger {
 
     // refreshActivityBar will populate the tree view using the latest tags
     public refreshActivityBar() {
-        this.activityBar.refresh(this.tags.getTagsAsMap(this.settings.patterns));
+        this.activityBar.refresh(this.tags.getTagsAsMap(this.patterns));
     }
     
     // refreshStatusBar will update the tag count in the status bar
     public refreshStatusBar(): void {
-        this.statusBar.refresh(this.settings.statusBar, this.tags.length, this.tags.getTagsAsMap(this.settings.patterns));
+        this.statusBar.refresh(this.settings.statusBar, this.tags.length, this.tags.getTagsAsMap(this.patterns));
     }
 
     // refreshDecorations will decorate the active text editor using the latest tags
@@ -255,8 +260,8 @@ export class Tagger {
         
         // Loop through the editors and refresh them
         for (let editor of editors) {
-            if (utils.shouldSearchDocument(editor.document, this.settings.exclude)) {
-                this.decorator.refresh(editor, this.tags.getTagsAsMap(this.settings.patterns, editor.document));
+            if (utils.shouldSearchDocument(editor.document, this.settings.include, this.settings.exclude)) {
+                this.decorator.refresh(editor, this.tags.getTagsAsMap(this.patterns, editor.document));
             }
         }
     }
@@ -283,7 +288,7 @@ export class Tagger {
 
                 // Get patterns as quick pick items
                 let quickPickItemPattern: vscode.QuickPickItem[] = [];
-                for (let [index, pattern] of this.settings.patterns.entries()) {
+                for (let [index, pattern] of this.patterns.entries()) {
                     quickPickItemPattern.push({
                         label: `${index + 1}: ${pattern.name.toUpperCase()}`,
                         description: pattern.regexp.source,
@@ -296,7 +301,7 @@ export class Tagger {
                     if (selection) {
 
                         let id: number = parseInt(selection.label.substring(0, selection.label.indexOf(":"))) - 1;
-                        let pattern: Pattern = this.settings.patterns[id];
+                        let pattern: Pattern = this.patterns[id];
                         let tags: Tags = this.tags.getTags(pattern);
                         
                         // Get tags for pattern as quick pick items
@@ -343,7 +348,7 @@ export class Tagger {
                 
                 // Get patterns as quick pick items
                 let quickPickItemPattern: vscode.QuickPickItem[] = [];
-                for (let [index, pattern] of this.settings.patterns.entries()) {
+                for (let [index, pattern] of this.patterns.entries()) {
                     quickPickItemPattern.push({
                         label: `${index + 1}: ${pattern.name.toUpperCase()}`,
                         description: pattern.regexp.source,
@@ -356,7 +361,7 @@ export class Tagger {
                     if (selection) {
 
                         let id: number = parseInt(selection.label.substring(0, selection.label.indexOf(":"))) - 1;
-                        let pattern: Pattern = this.settings.patterns[id];
+                        let pattern: Pattern = this.patterns[id];
                         let tags: Tags = this.tags.getTags(pattern);
                         
                         // Get tags for pattern as quick pick items
@@ -391,7 +396,8 @@ export class Tagger {
     // Update all the tag views
     private async update(): Promise<void> {
         try {
-            await this.tags.update(this.settings.patterns, this.settings.include, this.settings.exclude);
+            await this.patterns.update(this.settings.patterns, this.settings.defaultPattern);
+            await this.tags.update(this.patterns, this.settings.include, this.settings.exclude);
         } catch (err) {
             log.Error(err);
         }

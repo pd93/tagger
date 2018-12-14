@@ -1,14 +1,15 @@
 'use strict';
 
-export { ActivityBar } from './activityBar';
-export { Decorator } from './decorator';
-export { Pattern } from './pattern';
-export { Settings } from './settings';
-export { StatusBar } from './statusBar';
-export { StatusBarSettings } from './settings';
-export { SVG } from './svg';
-export { Tag } from './tag';
-export { Tagger } from './tagger';
-export { Tags } from './tags';
-export { TreeDataProvider } from './treeDataProvider';
-export { TreeItem } from './treeItem';
+export * from './activityBar';
+export * from './decorator';
+export * from './pattern';
+export * from './patterns';
+export * from './settings';
+export * from './statusBar';
+export * from './settings';
+export * from './svg';
+export * from './tag';
+export * from './tagger';
+export * from './tags';
+export * from './treeDataProvider';
+export * from './treeItem';

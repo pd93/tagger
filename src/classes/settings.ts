@@ -2,14 +2,13 @@
 
 import * as vscode from 'vscode';
 import * as log from '../log';
-import { Pattern, SVG } from './';
 
-interface DefaultPatternSettings {
+export interface DefaultPatternSettings {
     flags: string;
     style: vscode.DecorationRenderOptions;
 }
 
-interface PatternSettings extends DefaultPatternSettings {
+export interface PatternSettings extends DefaultPatternSettings {
     name: string;
     pattern: string;
 }
@@ -27,12 +26,13 @@ export class Settings {
     }
 
     // Variables
-    public updateOn: string = "";
-    public include: string = "";
-    public exclude: string = "";
-    public goToBehaviour: string = "";
-    public statusBar: StatusBarSettings = {enabled: true, output: ""};
-    public patterns: Pattern[] = [];
+    public updateOn!: string;
+    public include!: string;
+    public exclude!: string;
+    public goToBehaviour!: string;
+    public statusBar!: StatusBarSettings;
+    public defaultPattern!: DefaultPatternSettings;
+    public patterns!: PatternSettings[];
 
     // update prints a message and calls load
     public update() {
@@ -46,66 +46,34 @@ export class Settings {
         // Get the workspace config
         let config = vscode.workspace.getConfiguration("tagger");
     
-        // Assign the settings or their defaults
-        this.updateOn = config.get("updateOn") || "change";
-        this.include = config.get("include") || "**/*";
-        this.exclude = config.get("exclude") || "**/node_modules/*";
-        this.goToBehaviour = config.get("goToBehaviour") || "end";
-
-        //
-        // Status Bar
-        //
-
+        // Get the configs
+        let updateOn: string | undefined = config.get("updateOn");
+        let include: string | undefined = config.get("include");
+        let exclude: string | undefined = config.get("exclude");
+        let goToBehaviour: string | undefined = config.get("goToBehaviour");
         let statusBarEnabled: boolean | undefined = config.get("statusBar.enabled");
-        this.statusBar.enabled = statusBarEnabled !== undefined ? statusBarEnabled : true;
-        this.statusBar.output = config.get("statusBar.output") || "$(tag) {all}";
+        let statusBarOutput: string | undefined = config.get("statusBar.output");
+        let defaultPatternFlags: string | undefined = config.get("defaultPattern.flags");
+        let defaultPatternStyle: vscode.DecorationRenderOptions | undefined = config.get("defaultPattern.style");
+        let patternSettings: PatternSettings[] | undefined = config.get("patterns");
 
-        //
-        // Patterns
-        //
-
-        this.patterns = [];
-
-        // Get default pattern settings
-        let defaultPatternSettings: DefaultPatternSettings = {
-            flags: config.get("defaultPattern.flags") || 'g',
-            style: config.get("defaultPattern.style") || {}
+        // Set the configs
+        this.updateOn = updateOn !== undefined ? updateOn : "change";
+        this.include = include !== undefined ? include : "**/*";
+        this.exclude = exclude !== undefined ? exclude : "**/{node_modules,vendor}/*";
+        this.goToBehaviour = goToBehaviour !== undefined ? goToBehaviour : "end";
+        this.statusBar = {
+            enabled: statusBarEnabled !== undefined ? statusBarEnabled : true,
+            output: statusBarOutput !== undefined ? statusBarOutput : "$(tag) {all}"
         };
-
-        // Fetch the patterns settings
-        let patternSettings: PatternSettings[] = config.get("patterns") || [];
-        let mergedPatternSettingStyle: vscode.DecorationRenderOptions;
-        let mergedPatternSettingFlags: string;
-        
-        // Reset tag SVGs
-        SVG.reset();
-        
-        // Loop through the pattern settings
-        for (let patternSetting of patternSettings) {
-
-            // Validate the name
-            if (!patternSetting.name) {
-                vscode.window.showErrorMessage("Missing property: 'name' in pattern object");
-                return;
+        this.defaultPattern = {
+            flags: defaultPatternFlags !== undefined ? defaultPatternFlags : "g",
+            style: defaultPatternStyle !== undefined ? defaultPatternStyle : {
+                color: "#FFFFFF",
+                backgroundColor: "#CF3F61",
+                overviewRulerColor: "#CF3F61"
             }
-
-            // Validate the pattern
-            if (!patternSetting.pattern) {
-                vscode.window.showErrorMessage("Missing property: 'pattern' in pattern object");
-                return;
-            }
-
-            // Merge the pattern settings with the defaults
-            mergedPatternSettingFlags = patternSetting.flags ? patternSetting.flags : defaultPatternSettings.flags;
-            mergedPatternSettingStyle = {...defaultPatternSettings.style, ...patternSetting.style};
-    
-            // Create a new pattern object from each setting
-            this.patterns.push(new Pattern(
-                patternSetting.name,
-                patternSetting.pattern,
-                mergedPatternSettingFlags,
-                mergedPatternSettingStyle
-            ));
-        }
+        };
+        this.patterns = patternSettings !== undefined ? patternSettings : [];
     }
 }
