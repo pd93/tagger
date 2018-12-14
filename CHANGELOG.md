@@ -5,14 +5,13 @@
 - Regex pattern matching
 - Tag browser
 - Highlight tags
+- Customisable status bar
 - Alphabetical tag sorting
 - Added commands:
   - Go to tag
   - Delete tag
-  - Refresh
-  - Refresh Decoration
-  - Refresh Activity Bar
+  - Refresh Decorations / Activity Bar / Status Bar / All
 - Added the ability to hot reload the `settings.json` file
-- Added overrides for appropriate pattern settings.
+- Added overrides for appropriate pattern settings
 - Added support for regular expression flags
 - Added display formatting with capture groups
