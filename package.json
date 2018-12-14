@@ -147,6 +147,22 @@
                             "default": "end",
                             "description": "Set the cursor behaviour when navigating to a tag."
                         },
+                        "statusBar": {
+                            "type": "object",
+                            "description": "Display settings for the tagger status bar item.",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean",
+                                    "default": true,
+                                    "description": "Whether or not the status bar item should be displayed."
+                                },
+                                "output": {
+                                    "type": "string",
+                                    "default": "$(tag) {all}",
+                                    "description": "Describes what to display in the status bar. Icons can be displayed with the `$(icon)` sytnax where 'icon' can be any [Octicon name](https://octicons.github.com). You can also insert tagger values with the `{value}` syntax where 'value' can be `all` or the name of a tag"
+                                }
+                            }
+                        },
                         "defaultPattern": {
                             "type": "object",
                             "description": "Default tag settings.",

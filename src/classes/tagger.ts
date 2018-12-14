@@ -242,7 +242,7 @@ export class Tagger {
     
     // refreshStatusBar will update the tag count in the status bar
     public refreshStatusBar(): void {
-        this.statusBar.refresh(this.tags.length);
+        this.statusBar.refresh(this.settings.statusBar, this.tags.length, this.tags.getTagsAsMap(this.settings.patterns));
     }
 
     // refreshDecorations will decorate the active text editor using the latest tags

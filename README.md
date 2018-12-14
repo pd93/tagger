@@ -47,19 +47,19 @@ You do not need to exclude binary files as Tagger does this for you.
 
 This should be set to either `start`, `end` (default) or `highlight`. When you navigate to a tag and `goToBehaviour` is set to `start` or `end` the cursor will move the start or end of the tag respectively. When set to `highlight` the tag text will be highlighted.
 
+### `statusBar: Object - Status bar settings.`
+
+- `enabled: boolean` - Whether or not the status bar item should be displayed. This is to `true` by default. Change the value to `false` to hide tagger from the status bar.
+- `output: string` - Describes what to display in the status bar. Icons can be displayed with the `$(icon)` sytnax where 'icon' can be any [Octicon name](https://octicons.github.com). You can also insert tag count values with the `{tag}` syntax where 'tag' can be `all` or the name of a tag.
+
 ---
 
 ### `defaultPattern: Object` - Default tag settings.
 
 This section allows you to specify the default settings for patterns. These settings will be applied to all tags unless overriden (see `patterns` below).
 
-The `flags` field allows you to specify regular expression flags (default is `g`).
-
-- `flags: string`
-
-The  Below, is a list of supported styles:
-
-- `style: Object`
+- `flags: string (default="g")` - The `flags` field allows you to specify regular expression flags.
+- `style: Object` - This is a list of supported styles:
   - `backgroundColor: string`
   - `border: string`
   - `borderColor: string`
@@ -74,7 +74,7 @@ The  Below, is a list of supported styles:
   - `overviewRulerColor: string`
   - `textDecoration: string`
 
-For more details, see the [vscode.DecorationRenderOptions](https://code.visualstudio.com/docs/extensionAPI/vscode-api#DecorationRenderOptions) documenation.
+For more details on styling options, see the [vscode.DecorationRenderOptions](https://code.visualstudio.com/docs/extensionAPI/vscode-api#DecorationRenderOptions) documenation.
 
 ---
 
@@ -106,6 +106,11 @@ You can format the text that is displayed for the tag by using [capture groups](
         "updateOn": "change",
         "include": "**/*",
         "exclude": "**/node_modules/*",
+        "goToBehaviour": "highlight",
+        "statusBar": {
+            "enabled": true,
+            "output": "$(tag) {all}  $(check) {todo}  $(bug) {issue}"
+        },
         "defaultPattern": {
             "style": {
                 "color": "#FFF",

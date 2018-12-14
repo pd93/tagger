@@ -14,6 +14,11 @@ interface PatternSettings extends DefaultPatternSettings {
     pattern: string;
 }
 
+export interface StatusBarSettings {
+    enabled: boolean;
+    output: string;
+}
+
 export class Settings {
 
     constructor() {
@@ -26,6 +31,7 @@ export class Settings {
     public include: string = "";
     public exclude: string = "";
     public goToBehaviour: string = "";
+    public statusBar: StatusBarSettings = {enabled: true, output: ""};
     public patterns: Pattern[] = [];
 
     // update prints a message and calls load
@@ -45,6 +51,19 @@ export class Settings {
         this.include = config.get("include") || "**/*";
         this.exclude = config.get("exclude") || "**/node_modules/*";
         this.goToBehaviour = config.get("goToBehaviour") || "end";
+
+        //
+        // Status Bar
+        //
+
+        let statusBarEnabled: boolean | undefined = config.get("statusBar.enabled");
+        this.statusBar.enabled = statusBarEnabled !== undefined ? statusBarEnabled : true;
+        this.statusBar.output = config.get("statusBar.output") || "$(tag) {all}";
+
+        //
+        // Patterns
+        //
+
         this.patterns = [];
 
         // Get default pattern settings

@@ -5,6 +5,7 @@ export { Decorator } from './decorator';
 export { Pattern } from './pattern';
 export { Settings } from './settings';
 export { StatusBar } from './statusBar';
+export { StatusBarSettings } from './settings';
 export { SVG } from './svg';
 export { Tag } from './tag';
 export { Tagger } from './tagger';
