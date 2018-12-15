@@ -2,13 +2,13 @@
 
 import * as vscode from 'vscode';
 import * as log from '../log';
-import { Pattern, PatternSettings, DefaultPatternSettings, SVG } from './';
+import { Pattern, IPatternSettings, IDefaultPatternSettings, SVG } from './';
 
 export class Patterns extends Array<Pattern> {
 
     constructor(
-        patternSettings?: PatternSettings[],
-        defaultPatternSettings?: DefaultPatternSettings
+        patternSettings?: IPatternSettings[],
+        defaultPatternSettings?: IDefaultPatternSettings
     ) {
         super();
 
@@ -19,7 +19,7 @@ export class Patterns extends Array<Pattern> {
     }
 
     // update will update the patterns array
-    public update(patternSettings: PatternSettings[], defaultPatternSettings: DefaultPatternSettings) {
+    public update(patternSettings: IPatternSettings[], defaultPatternSettings: IDefaultPatternSettings) {
 
         log.Info("Updating patterns...");
 

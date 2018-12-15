@@ -3,17 +3,17 @@
 import * as vscode from 'vscode';
 import * as log from '../log';
 
-export interface DefaultPatternSettings {
+export interface IDefaultPatternSettings {
     flags: string;
     style: vscode.DecorationRenderOptions;
 }
 
-export interface PatternSettings extends DefaultPatternSettings {
+export interface IPatternSettings extends IDefaultPatternSettings {
     name: string;
     pattern: string;
 }
 
-export interface StatusBarSettings {
+export interface IStatusBarSettings {
     enabled: boolean;
     output: string;
 }
@@ -24,15 +24,15 @@ export class Settings {
         log.Info("Creating Settings...");
         this.load();
     }
-
+    
     // Variables
     public updateOn!: string;
     public include!: string;
     public exclude!: string;
     public goToBehaviour!: string;
-    public statusBar!: StatusBarSettings;
-    public defaultPattern!: DefaultPatternSettings;
-    public patterns!: PatternSettings[];
+    public statusBar!: IStatusBarSettings;
+    public defaultPattern!: IDefaultPatternSettings;
+    public patterns!: IPatternSettings[];
 
     // update prints a message and calls load
     public update() {
@@ -55,7 +55,7 @@ export class Settings {
         let statusBarOutput: string | undefined = config.get("statusBar.output");
         let defaultPatternFlags: string | undefined = config.get("defaultPattern.flags");
         let defaultPatternStyle: vscode.DecorationRenderOptions | undefined = config.get("defaultPattern.style");
-        let patternSettings: PatternSettings[] | undefined = config.get("patterns");
+        let patterns: IPatternSettings[] | undefined = config.get("patterns");
 
         // Set the configs
         this.updateOn = updateOn !== undefined ? updateOn : "change";
@@ -74,6 +74,6 @@ export class Settings {
                 overviewRulerColor: "#CF3F61"
             }
         };
-        this.patterns = patternSettings !== undefined ? patternSettings : [];
+        this.patterns = patterns !== undefined ? patterns : [];
     }
 }

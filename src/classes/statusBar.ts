@@ -2,7 +2,7 @@
 
 import * as vscode from 'vscode';
 import * as log from '../log';
-import { StatusBarSettings, Tags } from './';
+import { IStatusBarSettings, Tags } from './';
 
 export class StatusBar {
 
@@ -11,7 +11,7 @@ export class StatusBar {
     }
 
     // refresh will update the tag count displayed in the status bar
-    public refresh(statusBarSettings: StatusBarSettings, count: number, tagMap: Map<string, Tags>) {
+    public refresh(statusBarSettings: IStatusBarSettings, count: number, tagMap: Map<string, Tags>) {
 
         if (statusBarSettings.enabled) {
 
