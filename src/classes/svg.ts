@@ -26,7 +26,7 @@ export class SVG {
     ) {
         
         // Create a filename
-        this.filename = path.join(__filename, '..', '..', '..', 'res', 'tags', `${name}.svg`);
+        this.filename = path.join(__dirname, '..', '..', '..', 'res', 'tags', `${name}.svg`);
         
         // Set the SVG color
         let text = template.replace(/{{color}}/g, `${this.color}`);
@@ -41,7 +41,7 @@ export class SVG {
     public static reset(): void {
 
         // Create a path to the directory
-        let directory: string = path.join(__filename, '..', '..', '..', 'res', 'tags');
+        let directory: string = path.join(__dirname, '..', '..', '..', 'res', 'tags');
 
         // If directory exists
         if (fs.existsSync(directory)) {
