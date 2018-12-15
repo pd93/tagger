@@ -22,20 +22,20 @@ export class Tags extends Array<Tag> {
     }
 
     // update will update the entire list of tags from scratch
-    public async update(patterns: Pattern[], include: string, exclude: string) {
+    public async update(patterns: Pattern[], include: string, exclude: string, glob: vscode.GlobPattern = "**/*"): Promise<number> {
 
         log.Info("Updating tags...");
 
-		// Init
-		this.length = 0; // Clear the array
-		let skipped: number = 0;
-		let failed: number = 0;
+        // Init
+        let count: number = 0;
+        let skipped: number = 0;
+        let failed: number = 0;
 
 		// Get a list of files in the workspace
-        let uris = await vscode.workspace.findFiles("**/*");
+        let uris = await vscode.workspace.findFiles(glob);
         
         let pluralFiles = uris.length === 1 ? "" : "s";
-		log.Info(`Found ${uris.length} file${pluralFiles} in the workspace`);
+		log.Info(`Found ${uris.length} file${pluralFiles} for pattern: '${glob}'`);
 
 		// Loop through the files
 		for (let uri of uris) {
@@ -44,23 +44,27 @@ export class Tags extends Array<Tag> {
             if (utils.shouldSearchFile(uri, include, exclude)) {
 
                 // Update the tags
-                let count = await this.updateForFile(patterns, uri, false);
+                let updated = await this.updateForFile(patterns, uri, false);
+                count += updated;
 
                 // If it failed to open the file, increment the counter
-                if (count < 0) {
+                if (updated < 0) {
                     failed++;
                 }
+                
             } else {
                 skipped++;
             }
         }
 
         pluralFiles = uris.length-skipped-failed === 1 ? "" : "s";
-        let pluralTags = this.length === 1 ? "" : "s";
-		log.Info(`Found ${this.length} tag${pluralTags} in ${uris.length-skipped-failed} file${pluralFiles} (skipped: ${skipped}, failed: ${failed})`);
+        let pluralTags = count === 1 ? "" : "s";
+		log.Info(`Found ${count} tag${pluralTags} in ${uris.length-skipped-failed} file${pluralFiles} (skipped: ${skipped}, failed: ${failed})`);
         
         // Sort the tags
         this.sortTags();
+
+        return count;
     }
 
     // updateForFile will remove and re-add the tags for a given file
@@ -87,6 +91,8 @@ export class Tags extends Array<Tag> {
 
     // removeForFile will remove the tags for a given file
     public removeForFile(uri: vscode.Uri, sort: boolean = true): number {
+
+        log.Info(`Removing tags for file: ${uri.fsPath}...`);
         
         // Init
         let count: number = 0;
@@ -96,6 +102,38 @@ export class Tags extends Array<Tag> {
             
             // If the filepaths match
             if (this[index].filepath === uri.fsPath) {
+                
+                // Remove the tag from the array
+                this.splice(index, 1);
+                
+                index--;
+                count++;
+            }
+        }
+        
+        // Sort the tags
+        if (sort) {
+            this.sortTags();
+        }
+        
+        log.Info(`${chalk.green("+0")} ${chalk.red(`-${count}`)}: ${uri.fsPath}`);
+
+        return count;
+    }
+
+    // removeForDirectory will recursively remove tags for files in a directory
+    public removeForDirectory(uri: vscode.Uri, sort: boolean = true) {
+        
+        log.Info(`Removing tags for directory: ${uri.fsPath}...`);
+        
+        // Init
+        let count: number = 0;
+        
+        // Loop through the instance tags
+        for (let index = 0; index < this.length; index++) {
+            
+            // If the tag filepath is a subdirectory of the given directory
+            if (this[index].filepath.includes(uri.fsPath)) {
                 
                 // Remove the tag from the array
                 this.splice(index, 1);
@@ -131,7 +169,7 @@ export class Tags extends Array<Tag> {
         
         log.Info(`${chalk.green(`+${added}`)} ${chalk.red(`-${removed}`)}: ${document.uri.fsPath}`);
 
-        return added + removed;
+        return added;
     }
 
     // addForDocument will add all the tags for a given document
@@ -204,6 +242,9 @@ export class Tags extends Array<Tag> {
 
     // sortTags will sort the tag array alphabetically
     public sortTags() {
+
+        log.Info("Sorting tags...");
+
         this.sort((a: Tag, b: Tag) => {
             let pa = a.pretty();
             let pb = b.pretty();

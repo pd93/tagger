@@ -1,3 +1,3 @@
 'use strict';
 
-export * from './exclude';
+export * from './utils';

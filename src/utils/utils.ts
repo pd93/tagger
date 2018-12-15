@@ -26,3 +26,21 @@ export function shouldSearchFile(uri: vscode.Uri, include: string, exclude: stri
 export function shouldSearchDocument(document: vscode.TextDocument, include: string, exclude: string): boolean {
     return !document.isUntitled && shouldSearchFile(document.uri, include, exclude);
 }
+
+// isFileOpen checks whether a given file is currently open in vscode
+export function isFileOpen(uri: vscode.Uri): boolean {
+    let editors = vscode.window.visibleTextEditors;
+    for (let editor of editors) {
+        if (uri.fsPath === editor.document.uri.fsPath) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// dirAsGlob will return a glob pattern to match files in a given directory
+export function dirAsGlob(uri: vscode.Uri): vscode.GlobPattern {
+    let workspaceDir = vscode.workspace.rootPath || "";
+    let pathFromWorkspace = uri.fsPath.replace(workspaceDir, "").replace("\\", "/");
+    return `**${pathFromWorkspace}/*`;
+}
