@@ -246,9 +246,19 @@ export class Tags extends Array<Tag> {
         log.Info("Sorting tags...");
 
         this.sort((a: Tag, b: Tag) => {
-            let pa = a.pretty();
-            let pb = b.pretty();
-            return pa > pb ? 1 : (pa < pb ? -1 : 0);
+
+            // Compare text
+            let ta = a.pretty();
+            let tb = b.pretty();
+            let text = ta > tb ? 1 : (ta < tb ? -1 : 0);
+
+            // Compare line numbers
+            let la = a.start.line;
+            let lb = b.start.line;
+            let line = la > lb ? 1 : (la < lb ? -1 : 0);
+
+            // Sort by text, then line
+            return text || line;
         });
     }
     
