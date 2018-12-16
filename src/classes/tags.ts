@@ -45,11 +45,12 @@ export class Tags extends Array<Tag> {
 
                 // Update the tags
                 let updated = await this.updateForFile(patterns, uri, false);
-                count += updated;
-
+                
                 // If it failed to open the file, increment the counter
                 if (updated < 0) {
                     failed++;
+                } else {
+                    count += updated;
                 }
                 
             } else {
