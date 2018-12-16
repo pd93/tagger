@@ -5,7 +5,7 @@ import * as minimatch from 'minimatch';
 
 // isConfigFile returns whether or not the file is a config file
 export function isConfigFile(uri: vscode.Uri): boolean {
-    return new RegExp(/^(?:\\\d+\\.*|.*settings.json|.*.vscode)$/).test(uri.fsPath);
+    return new RegExp(/^((\\|\/)\d+(\\|\/).*|.*settings\.json|.*\.vscode((\\|\/).*)?|.*\.git((\\|\/).*)?)$/).test(uri.fsPath);
 }
 
 export function isIncludedFile(uri: vscode.Uri, include: string): boolean {
