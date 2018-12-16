@@ -60,7 +60,7 @@ export class Settings {
         // Set the configs
         this.updateOn = updateOn !== undefined ? updateOn : "change";
         this.include = include !== undefined ? include : "**/*";
-        this.exclude = exclude !== undefined ? exclude : "**/{node_modules,vendor}/*";
+        this.exclude = exclude !== undefined ? exclude : "**/{node_modules,vendor}/**";
         this.goToBehaviour = goToBehaviour !== undefined ? goToBehaviour : "end";
         this.statusBar = {
             enabled: statusBarEnabled !== undefined ? statusBarEnabled : true,

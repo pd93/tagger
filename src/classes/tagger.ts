@@ -251,7 +251,7 @@ export class Tagger {
                 log.Event("fs create dir", `${uri.fsPath}`);
 
                 // Check for files in created folder (for renames)
-                await this.tags.update(this.patterns, this.settings.include, this.settings.exclude, utils.dirAsGlob(uri));
+                await this.tags.update(this.patterns, utils.dirAsGlob(uri), this.settings.exclude);
 
                 // Update the UI
                 this.refreshActivityBar();
@@ -267,7 +267,7 @@ export class Tagger {
     }
 
     // onDidCreate listens for deleted files in the workspace
-    private async onDidDelete(uri: vscode.Uri) {
+    private onDidDelete(uri: vscode.Uri) {
             
         try {
 
@@ -289,7 +289,7 @@ export class Tagger {
                     this.refreshStatusBar();
 
                 } else {
-                    log.Error(new Error(`- failed to update tags for file or directory: ${uri.fsPath}`));
+                    log.Info(`file or directory no longer exists or contained no tags: ${uri.fsPath}`);
                 }
 
             } else {

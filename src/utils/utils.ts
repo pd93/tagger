@@ -39,7 +39,7 @@ export function isFileOpen(uri: vscode.Uri): boolean {
 }
 
 // dirAsGlob will return a glob pattern to match files in a given directory
-export function dirAsGlob(uri: vscode.Uri): vscode.GlobPattern {
+export function dirAsGlob(uri: vscode.Uri): string {
     let workspaceDir = vscode.workspace.rootPath || "";
     let pathFromWorkspace = uri.fsPath.replace(workspaceDir, "").replace("\\", "/");
     return `**${pathFromWorkspace}/*`;

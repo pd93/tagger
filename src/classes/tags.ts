@@ -22,7 +22,7 @@ export class Tags extends Array<Tag> {
     }
 
     // update will update the entire list of tags from scratch
-    public async update(patterns: Pattern[], include: string, exclude: string, glob: vscode.GlobPattern = "**/*"): Promise<number> {
+    public async update(patterns: Pattern[], include: string, exclude: string): Promise<number> {
 
         log.Info("Updating tags...");
 
@@ -32,16 +32,16 @@ export class Tags extends Array<Tag> {
         let failed: number = 0;
 
 		// Get a list of files in the workspace
-        let uris = await vscode.workspace.findFiles(glob);
+        let uris = await vscode.workspace.findFiles(include, exclude);
         
         let pluralFiles = uris.length === 1 ? "" : "s";
-		log.Info(`Found ${uris.length} file${pluralFiles} for pattern: '${glob}'`);
+		log.Info(`Found ${uris.length} file${pluralFiles}'`);
 
 		// Loop through the files
 		for (let uri of uris) {
 
             // Make sure it's not a config file
-            if (utils.shouldSearchFile(uri, include, exclude)) {
+            if (!utils.isConfigFile(uri)) {
 
                 // Update the tags
                 let updated = await this.updateForFile(patterns, uri, false);

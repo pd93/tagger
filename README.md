@@ -35,7 +35,7 @@ Files that match this pattern will be searched for tags. The default pattern is 
 
 ### `exclude: string` - Glob pattern for files to exclude when searching for tags.
 
-Same as `include`, but files that match this pattern will **not** be searched for tags. The default value is `**/{node_modules,vendor}/*` which will stop Tagger from searching node or golang dependencies for tags.
+Same as `include`, but files that match this pattern will **not** be searched for tags. The default value is `**/{node_modules,vendor}/**` which will stop Tagger from searching node or golang dependencies for tags.
 
 Files matched by `include` *and* `exclude` will not be searched. 
 
@@ -107,7 +107,7 @@ You can format the text that is displayed for the tag by using [capture groups](
     "tagger": {
         "updateOn": "change",
         "include": "**/*",
-        "exclude": "**/{node_modules,vendor}/*",
+        "exclude": "**/{node_modules,vendor}/**",
         "goToBehaviour": "highlight",
         "statusBar": {
             "enabled": true,
