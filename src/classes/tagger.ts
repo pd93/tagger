@@ -78,10 +78,10 @@ export class Tagger {
         if (this.settings.updateOn !== "manual") {
             
             // When a file on the system is changed
-            this.watcher.onDidChange(uri => {this.onDidChange(uri);});
+            this.watcher.onDidChange(async uri => {await this.onDidChange(uri);});
             
             // When a file on the system is created
-            this.watcher.onDidCreate(uri => {this.onDidCreate(uri);});
+            this.watcher.onDidCreate(async uri => {await this.onDidCreate(uri);});
             
             // When a file or directory on the system is deleted
             this.watcher.onDidDelete(uri => {this.onDidDelete(uri);});
@@ -96,7 +96,7 @@ export class Tagger {
         }
     
         // Listen for configuration changes
-        vscode.workspace.onDidChangeConfiguration(event => {this.onDidChangeConfiguration(event);});
+        vscode.workspace.onDidChangeConfiguration(async event => {await this.onDidChangeConfiguration(event);});
     }
 
     public registerCommands(): void {
@@ -204,7 +204,7 @@ export class Tagger {
                 }
                 
             } else {
-                log.Event("fs change", `[skipped dir] ${uri.fsPath}`);
+                log.Event("fs change", `[skipped directory] ${uri.fsPath}`);
             }
 
         } catch (err) {
@@ -248,17 +248,18 @@ export class Tagger {
                     
             } else {
 
-                log.Event("fs create dir", `${uri.fsPath}`);
+                log.Event("fs create", `[directory] ${uri.fsPath}`);
 
                 // Check for files in created folder (for renames)
-                await this.tags.update(this.patterns, utils.dirAsGlob(uri), this.settings.exclude);
+                if (await this.tags.update(this.patterns, utils.dirAsGlob(uri), this.settings.exclude) > 0) {
 
-                // Update the UI
-                this.refreshActivityBar();
-                this.refreshStatusBar();
+                    // Update the UI
+                    this.refreshActivityBar();
+                    this.refreshStatusBar();
 
-                // Files in the dir may be open, so refresh decorations too
-                this.refreshDecorations();
+                    // Files in the dir may be open, so refresh decorations too
+                    this.refreshDecorations();
+                }
             }
 
         } catch (err) {
@@ -276,20 +277,14 @@ export class Tagger {
                 
                 log.Event("fs delete", uri.fsPath);
 
-                // If it's a file that changed
-                if (this.tags.removeForFile(uri) > 0) {
-
-                    this.refreshActivityBar();
-                    this.refreshStatusBar();
-
-                // If no tags were found, it could be a directory
-                } else if (this.tags.removeForDirectory(uri) > 0) {
+                // Check if we can find changes to tags in the file or directory
+                if (this.tags.removeForFile(uri) > 0 || this.tags.removeForDirectory(uri) > 0) {
 
                     this.refreshActivityBar();
                     this.refreshStatusBar();
 
                 } else {
-                    log.Info(`file or directory no longer exists or contained no tags: ${uri.fsPath}`);
+                    log.Info(`File or directory no longer exists or contained no tags: ${uri.fsPath}`);
                 }
 
             } else {
