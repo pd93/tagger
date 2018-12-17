@@ -267,8 +267,8 @@ export class Tags extends Array<Tag> {
     // Getters
     //
 
-    // getTags will return an array of tags found for a given pattern and/or document
-    public getTags(pattern: Pattern, document?: vscode.TextDocument): Tags {
+    // get will return an array of tags found for a given pattern and/or document
+    public get(pattern: Pattern, document?: vscode.TextDocument): Tags {
 
         // Init
         let tags: Tags = new Tags();
@@ -294,15 +294,15 @@ export class Tags extends Array<Tag> {
         return tags;
     }
 
-    // getTagsAsMap will return a map of patterns to tags found globally or for a given document
-    public getTagsAsMap(patterns: Pattern[], document?: vscode.TextDocument): Map<string, Tags> {
+    // getMap will return a map of patterns to tags found globally or for a given document
+    public getMap(patterns: Pattern[], document?: vscode.TextDocument): Map<string, Tags> {
         
         // Init
         let tagMap: Map<string, Tags> = new Map();
 
         // Loop through the patterns and populate the map
         for (let pattern of patterns) {
-            tagMap.set(pattern.name, this.getTags(pattern, document));
+            tagMap.set(pattern.name, this.get(pattern, document));
         }
 
         return tagMap;

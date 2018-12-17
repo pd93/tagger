@@ -7,7 +7,16 @@ import { Tagger } from './classes';
 export function activate(context: vscode.ExtensionContext) {
 
     // Create a new instance of Tagger
-    new Tagger(context);
+    let tagger: Tagger = new Tagger();
+
+    // Register commands and listeners
+    tagger.registerCommands(context);
+    tagger.registerListeners(context);
+
+    // Refresh everything
+    tagger.update().then(() => {
+        tagger.refresh();
+    });
 }
 
 // Deactivate the extension
