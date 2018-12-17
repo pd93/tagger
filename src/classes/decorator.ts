@@ -7,14 +7,14 @@ import { Pattern, Tags } from './';
 export class Decorator {
 
     constructor(
-        private patterns: Pattern[]
+        private _patterns: Pattern[]
     ) {
         log.Info("Creating Decorator...");
     }
 
     // setPatterns will set the patterns variable
     public setPatterns(patterns: Pattern[]): void {
-        this.patterns = patterns;
+        this._patterns = patterns;
     }
 
     // refresh will decorate the active text editor by highlighting tags
@@ -26,7 +26,7 @@ export class Decorator {
         let ranges: vscode.Range[];
         
         // Loop through the patterns
-        for (let pattern of this.patterns) {
+        for (let pattern of this._patterns) {
 
             // Init
             ranges = [];

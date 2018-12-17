@@ -22,7 +22,7 @@ export class Settings {
 
     constructor() {
         log.Info("Creating Settings...");
-        this.load();
+        this._load();
     }
     
     // Variables
@@ -37,11 +37,11 @@ export class Settings {
     // update prints a message and calls load
     public update() {
         log.Info("Updating Settings...");
-        this.load();
+        this._load();
     }
 
-    // load fetches all the settings from the workspace configuration file
-    private load() {
+    // _load fetches all the settings from the workspace configuration file
+    private _load() {
         
         // Get the workspace config
         let config = vscode.workspace.getConfiguration("tagger");

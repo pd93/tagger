@@ -13,25 +13,25 @@ export class ActivityBar {
         log.Info("Creating TreeView...");
 
         // Create the data provider
-        this.treeDataProvider = new TreeDataProvider(patterns);
+        this._treeDataProvider = new TreeDataProvider(patterns);
         
         // Register the tree view with its data provider
         vscode.window.createTreeView('tagger-tags', {
-            treeDataProvider: this.treeDataProvider,
+            treeDataProvider: this._treeDataProvider,
             showCollapseAll: true
         });
     }
 
     // Variables
-    private treeDataProvider: TreeDataProvider;
+    private _treeDataProvider: TreeDataProvider;
 
     // refresh
     public refresh(tagMap: Map<string, Tags>) {
-        this.treeDataProvider.refresh(tagMap);
+        this._treeDataProvider.refresh(tagMap);
     }
 
     // setPatterns
     public setPatterns(patterns: Pattern[]) {
-        this.treeDataProvider.setPatterns(patterns);
+        this._treeDataProvider.setPatterns(patterns);
     }
 }

@@ -82,7 +82,7 @@ export class Tags extends Array<Tag> {
     public async addForFile(patterns: Pattern[], uri: vscode.Uri): Promise<number> {
         try {
             let document: vscode.TextDocument = await vscode.workspace.openTextDocument(uri.fsPath);
-            let count: number = this.addForDocument(patterns, document);
+            let count: number = this._addForDocument(patterns, document);
             log.Info(`${chalk.green(`+${count}`)} ${chalk.red("-0")}: ${uri.fsPath}`);
             return count;
         } catch (err) {
@@ -158,10 +158,10 @@ export class Tags extends Array<Tag> {
     public updateForDocument(patterns: Pattern[], document: vscode.TextDocument, sort: boolean = true): number {
 
         // Remove the existing tags
-        let removed = this.removeForDocument(document, false);
+        let removed = this._removeForDocument(document, false);
     
         // Add the new tags
-        let added = this.addForDocument(patterns, document, false);
+        let added = this._addForDocument(patterns, document, false);
         
         // Sort the tags
         if (sort) {
@@ -174,7 +174,7 @@ export class Tags extends Array<Tag> {
     }
 
     // addForDocument will add all the tags for a given document
-    private addForDocument(patterns: Pattern[], document: vscode.TextDocument, sort: boolean = true): number {
+    private _addForDocument(patterns: Pattern[], document: vscode.TextDocument, sort: boolean = true): number {
 
         // Init
         let count: number = 0;
@@ -210,7 +210,7 @@ export class Tags extends Array<Tag> {
     }
     
     // removeForDocument will remove all the tags for a given document
-    private removeForDocument(document: vscode.TextDocument, sort: boolean = true): number {
+    private _removeForDocument(document: vscode.TextDocument, sort: boolean = true): number {
         
         // Init
         let count: number = 0;

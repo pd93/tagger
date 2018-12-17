@@ -9,15 +9,15 @@ import { Tag, Tags, Pattern, Patterns, ActivityBar, TreeItem, Decorator, StatusB
 export class Tagger {
 
     constructor(
-        private context: vscode.ExtensionContext
+        private _context: vscode.ExtensionContext
     ) {
 
         log.Info("Creating an instance of Tagger...");
 
         // Get the tagger settings
-        this.settings = new Settings();
-        this.patterns = new Patterns();
-        this.tags = new Tags();
+        this._settings = new Settings();
+        this._patterns = new Patterns();
+        this._tags = new Tags();
 
         // Register a tree view
         this.registerActivityBar();
@@ -35,19 +35,19 @@ export class Tagger {
         this.registerCommands();
 
         // Refresh everything
-        this.update().then(() => {
+        this._update().then(() => {
             this.refresh();
         });
     }
 
     // Variables
-    private settings: Settings;
-    private tags: Tags;
-    private patterns: Patterns;
-    private activityBar!: ActivityBar;
-    private statusBar!: StatusBar;
-    private decorator!: Decorator;
-    private watcher!: vscode.FileSystemWatcher;
+    private _settings: Settings;
+    private _tags: Tags;
+    private _patterns: Patterns;
+    private _activityBar!: ActivityBar;
+    private _statusBar!: StatusBar;
+    private _decorator!: Decorator;
+    private _watcher!: vscode.FileSystemWatcher;
 
     //
     // Registrars
@@ -55,76 +55,76 @@ export class Tagger {
 
     // registerActivityBar will register the tree view the tagger instance and vscode
     public registerActivityBar(): void {
-        this.activityBar = new ActivityBar(this.patterns);
+        this._activityBar = new ActivityBar(this._patterns);
     }
 
     // registerStatusBar will register the status bar item with the tagger instance and vscode
     public registerStatusBar(): void {
-        this.statusBar = new StatusBar();
+        this._statusBar = new StatusBar();
     }
 
     // registerDecorator will register the decorator with the tagger instance
     public registerDecorator(): void {
-        this.decorator = new Decorator(this.patterns);
+        this._decorator = new Decorator(this._patterns);
     }
 
     // registerListeners will register the listen events with the tagger instance and vscode
     public registerListeners(): void {
 
         // Create a filesystem watcher
-        this.watcher = vscode.workspace.createFileSystemWatcher("**/*");
+        this._watcher = vscode.workspace.createFileSystemWatcher("**/*");
 
         // If manual updating is turned off (update on save)
-        if (this.settings.updateOn !== "manual") {
+        if (this._settings.updateOn !== "manual") {
             
             // When a file on the system is changed
-            this.watcher.onDidChange(async uri => {await this.onDidChange(uri);});
+            this._watcher.onDidChange(async uri => {await this._onDidChange(uri);});
             
             // When a file on the system is created
-            this.watcher.onDidCreate(async uri => {await this.onDidCreate(uri);});
+            this._watcher.onDidCreate(async uri => {await this._onDidCreate(uri);});
             
             // When a file or directory on the system is deleted
-            this.watcher.onDidDelete(uri => {this.onDidDelete(uri);});
+            this._watcher.onDidDelete(uri => {this._onDidDelete(uri);});
     
             // Listen for when the active editor changes
-            vscode.window.onDidChangeVisibleTextEditors(editors => {this.onDidChangeVisibleTextEditors(editors);}, null, this.context.subscriptions);
+            vscode.window.onDidChangeVisibleTextEditors(editors => {this._onDidChangeVisibleTextEditors(editors);}, null, this._context.subscriptions);
 
             // If it should update when files change in vscode too
-            if (this.settings.updateOn === "change") {
-                vscode.workspace.onDidChangeTextDocument(event => {this.onDidChangeTextDocument(event);}, null, this.context.subscriptions);
+            if (this._settings.updateOn === "change") {
+                vscode.workspace.onDidChangeTextDocument(event => {this._onDidChangeTextDocument(event);}, null, this._context.subscriptions);
             }
         }
     
         // Listen for configuration changes
-        vscode.workspace.onDidChangeConfiguration(async event => {await this.onDidChangeConfiguration(event);});
+        vscode.workspace.onDidChangeConfiguration(async event => {await this._onDidChangeConfiguration(event);});
     }
 
     public registerCommands(): void {
 
         // Refresh activity bar
-        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshActivityBar', () => {
+        this._context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshActivityBar', () => {
             this.refreshActivityBar();
         }));
 
         // Refresh status bar
-        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshStatusBar', () => {
+        this._context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshStatusBar', () => {
             this.refreshStatusBar();
         }));
         
         // Refresh decorations
-        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshDecorations', () => {
+        this._context.subscriptions.push(vscode.commands.registerCommand('tagger.refreshDecorations', () => {
             this.refreshDecorations();
         }));
         
         // Refresh everything
-        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.refresh', () => {
-            this.update().then(() => {
+        this._context.subscriptions.push(vscode.commands.registerCommand('tagger.refresh', () => {
+            this._update().then(() => {
                 this.refresh();
             });
         }));
         
         // Navigate to a tag
-        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.goToTag', (treeItem?: TreeItem, tag?: Tag) => {
+        this._context.subscriptions.push(vscode.commands.registerCommand('tagger.goToTag', (treeItem?: TreeItem, tag?: Tag) => {
             if (treeItem && treeItem.tag) {
                 this.goToTag(treeItem.tag, false);
             } else if (tag) {
@@ -135,7 +135,7 @@ export class Tagger {
         }));
         
         // Delete a tag
-        this.context.subscriptions.push(vscode.commands.registerCommand('tagger.deleteTag', (treeItem?: TreeItem) => {
+        this._context.subscriptions.push(vscode.commands.registerCommand('tagger.deleteTag', (treeItem?: TreeItem) => {
             this.deleteTag(treeItem ? treeItem.tag : undefined);
         }));
     }
@@ -145,15 +145,15 @@ export class Tagger {
     //
 
     // onDidChangeTextDocument listens for changes to documents in the workspace
-    private onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
+    private _onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
 
         // Check if we should search the file
-        if (utils.shouldSearchDocument(event.document, this.settings.include, this.settings.exclude)) {
+        if (utils.shouldSearchDocument(event.document, this._settings.include, this._settings.exclude)) {
 
             log.Event("doc change", event.document.uri.fsPath);
             
             // Update tags for the file that changed
-            this.tags.updateForDocument(this.patterns, event.document);
+            this._tags.updateForDocument(this._patterns, event.document);
             
             // Refresh the activity and status bars
             this.refreshActivityBar();
@@ -170,7 +170,7 @@ export class Tagger {
     }
 
     // onDidChange listens for changes to files in the workspace
-    private async onDidChange(uri: vscode.Uri) {
+    private async _onDidChange(uri: vscode.Uri) {
 
         try {
 
@@ -181,12 +181,12 @@ export class Tagger {
                 if (!utils.isFileOpen(uri)) {
                                 
                     // Check if we should search the file
-                    if (utils.shouldSearchFile(uri, this.settings.include, this.settings.exclude)) {
+                    if (utils.shouldSearchFile(uri, this._settings.include, this._settings.exclude)) {
                         
                         log.Event("fs change", uri.fsPath);
 
                         // Update tags for the file that changed
-                        if (await this.tags.updateForFile(this.patterns, uri) >= 0) {
+                        if (await this._tags.updateForFile(this._patterns, uri) >= 0) {
             
                             this.refreshActivityBar();
                             this.refreshStatusBar();
@@ -213,7 +213,7 @@ export class Tagger {
     }
 
     // onDidCreate listens for new files in the workspace
-    private async onDidCreate(uri: vscode.Uri) {
+    private async _onDidCreate(uri: vscode.Uri) {
 
         try {
 
@@ -224,12 +224,12 @@ export class Tagger {
                 if (!utils.isFileOpen(uri)) {
 
                     // Check if we should search the file
-                    if (utils.shouldSearchFile(uri, this.settings.include, this.settings.exclude)) {
+                    if (utils.shouldSearchFile(uri, this._settings.include, this._settings.exclude)) {
                         
                         log.Event("fs create", uri.fsPath);
                         
                         // Update tags for the file that changed
-                        if (await this.tags.updateForFile(this.patterns, uri) >= 0) {
+                        if (await this._tags.updateForFile(this._patterns, uri) >= 0) {
 
                             this.refreshActivityBar();
                             this.refreshStatusBar();
@@ -251,7 +251,7 @@ export class Tagger {
                 log.Event("fs create", `[directory] ${uri.fsPath}`);
 
                 // Check for files in created folder (for renames)
-                if (await this.tags.update(this.patterns, utils.dirAsGlob(uri), this.settings.exclude) > 0) {
+                if (await this._tags.update(this._patterns, utils.dirAsGlob(uri), this._settings.exclude) > 0) {
 
                     // Update the UI
                     this.refreshActivityBar();
@@ -268,17 +268,17 @@ export class Tagger {
     }
 
     // onDidCreate listens for deleted files in the workspace
-    private onDidDelete(uri: vscode.Uri) {
+    private _onDidDelete(uri: vscode.Uri) {
             
         try {
 
             // Check if we should search the file or directory
-            if (utils.shouldSearchFile(uri, this.settings.include, this.settings.exclude)) {
+            if (utils.shouldSearchFile(uri, this._settings.include, this._settings.exclude)) {
                 
                 log.Event("fs delete", uri.fsPath);
 
                 // Check if we can find changes to tags in the file or directory
-                if (this.tags.removeForFile(uri) > 0 || this.tags.removeForDirectory(uri) > 0) {
+                if (this._tags.removeForFile(uri) > 0 || this._tags.removeForDirectory(uri) > 0) {
 
                     this.refreshActivityBar();
                     this.refreshStatusBar();
@@ -297,7 +297,7 @@ export class Tagger {
     }
 
     // onDidChangeVisibleTextEditors listens for changes in open editors
-    private onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]) {
+    private _onDidChangeVisibleTextEditors(editors: vscode.TextEditor[]) {
         
         // If the editor is active, refresh the decorations
         if (editors) {
@@ -306,7 +306,7 @@ export class Tagger {
     }
 
     // onDidChangeConfiguration listens for changes to configuration files
-    private async onDidChangeConfiguration(event: vscode.ConfigurationChangeEvent) {
+    private async _onDidChangeConfiguration(event: vscode.ConfigurationChangeEvent) {
 
         try {
             
@@ -314,14 +314,14 @@ export class Tagger {
             if (event.affectsConfiguration("tagger")) {
 
                 // Update the settings
-                this.settings.update();
+                this._settings.update();
 
                 // Update patterns and tags
-                await this.update();
+                await this._update();
                     
                 // Send the new patterns to the decorator and tree view
-                this.decorator.setPatterns(this.patterns);
-                this.activityBar.setPatterns(this.patterns);
+                this._decorator.setPatterns(this._patterns);
+                this._activityBar.setPatterns(this._patterns);
 
                 // Refresh the views
                 this.refresh();
@@ -338,12 +338,12 @@ export class Tagger {
 
     // refreshActivityBar will populate the tree view using the latest tags
     public refreshActivityBar() {
-        this.activityBar.refresh(this.tags.getTagsAsMap(this.patterns));
+        this._activityBar.refresh(this._tags.getTagsAsMap(this._patterns));
     }
     
     // refreshStatusBar will update the tag count in the status bar
     public refreshStatusBar(): void {
-        this.statusBar.refresh(this.settings.statusBar, this.tags.length, this.tags.getTagsAsMap(this.patterns));
+        this._statusBar.refresh(this._settings.statusBar, this._tags.length, this._tags.getTagsAsMap(this._patterns));
     }
 
     // refreshDecorations will decorate the active text editor using the latest tags
@@ -356,8 +356,8 @@ export class Tagger {
         
         // Loop through the editors and refresh them
         for (let editor of editors) {
-            if (utils.shouldSearchDocument(editor.document, this.settings.include, this.settings.exclude)) {
-                this.decorator.refresh(editor, this.tags.getTagsAsMap(this.patterns, editor.document));
+            if (utils.shouldSearchDocument(editor.document, this._settings.include, this._settings.exclude)) {
+                this._decorator.refresh(editor, this._tags.getTagsAsMap(this._patterns, editor.document));
             }
         }
     }
@@ -374,7 +374,7 @@ export class Tagger {
 
         // Tag parsed in
         if (tag) {
-            tag.go(this.settings.goToBehaviour, preview);
+            tag.go(this._settings.goToBehaviour, preview);
         }
 
         // Display a list of tags to navigate to
@@ -384,7 +384,7 @@ export class Tagger {
 
                 // Get patterns as quick pick items
                 let quickPickItemPattern: vscode.QuickPickItem[] = [];
-                for (let [index, pattern] of this.patterns.entries()) {
+                for (let [index, pattern] of this._patterns.entries()) {
                     quickPickItemPattern.push({
                         label: `${index + 1}: ${pattern.name.toUpperCase()}`,
                         description: pattern.regexp.source,
@@ -397,8 +397,8 @@ export class Tagger {
                     if (selection) {
 
                         let id: number = parseInt(selection.label.substring(0, selection.label.indexOf(":"))) - 1;
-                        let pattern: Pattern = this.patterns[id];
-                        let tags: Tags = this.tags.getTags(pattern);
+                        let pattern: Pattern = this._patterns[id];
+                        let tags: Tags = this._tags.getTags(pattern);
                         
                         // Get tags for pattern as quick pick items
                         let quickPickItemTag: vscode.QuickPickItem[] = [];
@@ -413,7 +413,7 @@ export class Tagger {
                         vscode.window.showQuickPick(quickPickItemTag).then(selection => {
                             if (selection) {
                                 let id: number = parseInt(selection.label.substring(0, selection.label.indexOf(":"))) - 1;
-                                tags[id].go(this.settings.goToBehaviour, preview);
+                                tags[id].go(this._settings.goToBehaviour, preview);
                             }
                         });                        
                     }
@@ -444,7 +444,7 @@ export class Tagger {
                 
                 // Get patterns as quick pick items
                 let quickPickItemPattern: vscode.QuickPickItem[] = [];
-                for (let [index, pattern] of this.patterns.entries()) {
+                for (let [index, pattern] of this._patterns.entries()) {
                     quickPickItemPattern.push({
                         label: `${index + 1}: ${pattern.name.toUpperCase()}`,
                         description: pattern.regexp.source,
@@ -457,8 +457,8 @@ export class Tagger {
                     if (selection) {
 
                         let id: number = parseInt(selection.label.substring(0, selection.label.indexOf(":"))) - 1;
-                        let pattern: Pattern = this.patterns[id];
-                        let tags: Tags = this.tags.getTags(pattern);
+                        let pattern: Pattern = this._patterns[id];
+                        let tags: Tags = this._tags.getTags(pattern);
                         
                         // Get tags for pattern as quick pick items
                         let quickPickItemTag: vscode.QuickPickItem[] = [];
@@ -490,10 +490,10 @@ export class Tagger {
     //
 
     // Update all the tag views
-    private async update(): Promise<void> {
+    private async _update(): Promise<void> {
         try {
-            this.patterns.update(this.settings.patterns, this.settings.defaultPattern);
-            await this.tags.update(this.patterns, this.settings.include, this.settings.exclude);
+            this._patterns.update(this._settings.patterns, this._settings.defaultPattern);
+            await this._tags.update(this._patterns, this._settings.include, this._settings.exclude);
         } catch (err) {
             log.Error(err);
         }

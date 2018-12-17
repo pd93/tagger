@@ -9,8 +9,8 @@ import { Tags, Pattern, TreeItem } from './';
 export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
 
 	constructor(
-		private patterns: Pattern[],
-		private tagMap: Map<string, Tags> = new Map()
+		private _patterns: Pattern[],
+		private _tagMap: Map<string, Tags> = new Map()
 	) {
 		log.Info("Creating TreeDataProvider...");
     }
@@ -21,43 +21,43 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
 
     // setPatterns will set the patterns variable
     public setPatterns(patterns: Pattern[]): void {
-        this.patterns = patterns;
+        this._patterns = patterns;
     }
 	
-	// Refresh will the refresh the tree view
+	// refresh will the refresh the tree view
 	public refresh(tagMap: Map<string, Tags>): void {
 		
 		log.Refresh("activity bar");
 		
-		this.tagMap = tagMap;
+		this._tagMap = tagMap;
 		this._onDidChangeTreeData.fire();
 	}
 
-	// GetTreeItem ...
+	// getTreeItem ...
 	public getTreeItem(element: TreeItem): vscode.TreeItem {
 		return element;
     }
 	
-	// GetChildren ...
+	// getChildren ...
     public getChildren(parent?: TreeItem): Thenable<TreeItem[]> {
 		
 		// If there is a parent, then we need to return tags
 		if (parent && parent.pattern) {
 			
 			// Get a list of tags for the parent pattern
-			return Promise.resolve(this.getTagTreeItems(parent.pattern));
+			return Promise.resolve(this._getTagTreeItems(parent.pattern));
 		}
 
 		// If there's no parent, get a list of patterns
-		return Promise.resolve(this.getPatternTreeItems());
+		return Promise.resolve(this._getPatternTreeItems());
 	}
 
 	//
 	// Helpers
 	//
 
-	// GetPatternTreeItems returns a list of TreeItems containing patterns
-	private getPatternTreeItems(): TreeItem[] {
+	// getPatternTreeItems returns a list of TreeItems containing patterns
+	private _getPatternTreeItems(): TreeItem[] {
 
 		log.Debug("Getting pattern tree items...");
 
@@ -66,10 +66,10 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
 		let count: number;
 
 		// Loop through the patterns
-		for (let pattern of this.patterns) {
+		for (let pattern of this._patterns) {
 
 			// Get the number of tags for this pattern
-			count = (this.tagMap.get(pattern.name) || new Tags()).length;
+			count = (this._tagMap.get(pattern.name) || new Tags()).length;
 
 			// Create the tree item
 			patternTreeItems.push(new TreeItem(
@@ -84,8 +84,8 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
 		return patternTreeItems;
 	}
 
-	// GetTagTreeItems returns a list of TreeItems containing tags for a parent pattern
-    private getTagTreeItems(pattern: Pattern): TreeItem[] {
+	// getTagTreeItems returns a list of TreeItems containing tags for a parent pattern
+    private _getTagTreeItems(pattern: Pattern): TreeItem[] {
 
 		log.Debug(`Getting tags tree items for pattern: '${pattern.name}'...`);
 
@@ -93,7 +93,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
 		let tagTreeItems: TreeItem[] = [];
 		
 		// Loop through the tags
-		for (let tag of this.tagMap.get(pattern.name) || []) {
+		for (let tag of this._tagMap.get(pattern.name) || []) {
 
 			// Create the tree item
 			tagTreeItems.push(new TreeItem(
