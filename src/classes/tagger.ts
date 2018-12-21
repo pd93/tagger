@@ -14,7 +14,7 @@ export class Tagger {
 
         // Init variables
         this._settings = new Settings();
-        this._patterns = new Patterns();
+        this._patterns = new Patterns(this._settings.patterns, this._settings.defaultPattern);
         this._tags = new Tags();
 
         // Init UI elements
