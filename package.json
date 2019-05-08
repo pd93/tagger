@@ -127,16 +127,6 @@
                             "default": "change",
                             "description": "Whether tagger should update tags when a file is changed or when it is saved."
                         },
-                        "include": {
-                            "type": "string",
-                            "default": "**/*",
-                            "description": "Glob pattern for files to include when searching for tags."
-                        },
-                        "exclude": {
-                            "type": "string",
-                            "default": "**/{node_modules,vendor}/**",
-                            "description": "Glob pattern for files to exclude when searching for tags."
-                        },
                         "goToBehaviour": {
                             "type": "string",
                             "enum": [
@@ -146,6 +136,32 @@
                             ],
                             "default": "end",
                             "description": "Set the cursor behaviour when navigating to a tag."
+                        },
+                        "files": {
+                            "type": "object",
+                            "description": "Control which files should be included/excluded from tagger's search.",
+                            "properties": {
+                                "include": {
+                                    "type": "string",
+                                    "default": "**/*",
+                                    "description": "Glob pattern for files to include when searching for tags."
+                                },
+                                "exclude": {
+                                    "type": "string",
+                                    "default": "**/{node_modules,vendor}/**",
+                                    "description": "Glob pattern for files to exclude when searching for tags."
+                                },
+                                "excludeConfigFiles": {
+                                    "type": "boolean",
+                                    "default": true,
+                                    "description": "Whether or not we should exclude config files (eg. settings.json)."
+                                },
+                                "excludeGitIgnoredFiles": {
+                                    "type": "boolean",
+                                    "default": true,
+                                    "description": "Whether or not we should exclude files that are ignored by Git (via the .gitignore file)."
+                                }
+                            }
                         },
                         "statusBar": {
                             "type": "object",
@@ -159,7 +175,7 @@
                                 "output": {
                                     "type": "string",
                                     "default": "$(tag) {all}",
-                                    "description": "Describes what to display in the status bar. Icons can be displayed with the `$(icon)` sytnax where 'icon' can be any [Octicon name](https://octicons.github.com). You can also insert tagger values with the `{value}` syntax where 'value' can be `all` or the name of a tag"
+                                    "description": "Describes what to display in the status bar. Icons can be displayed with the `$(icon)` sytnax where 'icon' can be any Octicon name (see https://octicons.github.com). You can also insert tagger values with the `{value}` syntax where 'value' can be `all` or the name of a tag."
                                 }
                             }
                         },

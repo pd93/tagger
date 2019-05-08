@@ -58,7 +58,7 @@ export class Tagger {
     // Update all the tag views
     public async update(): Promise<void> {
         try {
-            await this._tags.update(this._patterns, this._settings.include, this._settings.exclude);
+            await this._tags.update(this._patterns, this._settings.files);
         } catch (err) {
             log.Error(err);
         }
@@ -68,7 +68,7 @@ export class Tagger {
     // Registrars
     //
 
-    // registerListeners will register the listen events with the tagger instance and vscode
+    // registerListeners will register the listener events with the tagger instance and vscode
     public registerListeners(context: vscode.ExtensionContext): void {
 
         // If manual updating is turned off (update on save)
@@ -96,6 +96,7 @@ export class Tagger {
         vscode.workspace.onDidChangeConfiguration(async event => {await this._onDidChangeConfiguration(event);});
     }
 
+    // registerCommands will register the tagger commands with vscode
     public registerCommands(context: vscode.ExtensionContext): void {
 
         // Refresh activity bar
@@ -145,7 +146,7 @@ export class Tagger {
     private _onDidChangeTextDocument(event: vscode.TextDocumentChangeEvent) {
 
         // Check if we should search the file
-        if (utils.shouldSearchDocument(event.document, this._settings.include, this._settings.exclude)) {
+        if (utils.shouldSearchDocument(event.document, this._settings.files)) {
 
             log.Event("doc change", event.document.uri.fsPath);
             
@@ -178,7 +179,7 @@ export class Tagger {
                 if (!utils.isFileOpen(uri)) {
                                 
                     // Check if we should search the file
-                    if (utils.shouldSearchFile(uri, this._settings.include, this._settings.exclude)) {
+                    if (utils.shouldSearchFile(uri, this._settings.files)) {
                         
                         log.Event("fs change", uri.fsPath);
 
@@ -221,7 +222,7 @@ export class Tagger {
                 if (!utils.isFileOpen(uri)) {
 
                     // Check if we should search the file
-                    if (utils.shouldSearchFile(uri, this._settings.include, this._settings.exclude)) {
+                    if (utils.shouldSearchFile(uri, this._settings.files)) {
                         
                         log.Event("fs create", uri.fsPath);
                         
@@ -248,7 +249,12 @@ export class Tagger {
                 log.Event("fs create", `[directory] ${uri.fsPath}`);
 
                 // Check for files in created folder (for renames)
-                if (await this._tags.update(this._patterns, utils.dirAsGlob(uri), this._settings.exclude) > 0) {
+                if (await this._tags.update(this._patterns, {
+                    include: utils.dirAsGlob(uri),
+                    exclude: this._settings.files.exclude,
+                    excludeConfigFiles: this._settings.files.excludeConfigFiles,
+                    excludeGitIgnoredFiles: this._settings.files.excludeGitIgnoredFiles
+                }) > 0) {
 
                     // Update the UI
                     this.refreshActivityBar();
@@ -270,7 +276,7 @@ export class Tagger {
         try {
 
             // Check if we should search the file or directory
-            if (utils.shouldSearchFile(uri, this._settings.include, this._settings.exclude)) {
+            if (utils.shouldSearchFile(uri, this._settings.files)) {
                 
                 log.Event("fs delete", uri.fsPath);
 
@@ -309,6 +315,8 @@ export class Tagger {
             
             // If a change was made to the tagger config
             if (event.affectsConfiguration("tagger")) {
+
+                log.Event("config change");
 
                 // Update the settings
                 this._settings.update();
@@ -363,7 +371,7 @@ export class Tagger {
         
         // Loop through the editors and refresh them
         for (let editor of editors) {
-            if (utils.shouldSearchDocument(editor.document, this._settings.include, this._settings.exclude)) {
+            if (utils.shouldSearchDocument(editor.document, this._settings.files)) {
                 this._decorator.refresh(editor, this._tags.getMap(this._patterns, editor.document));
             }
         }

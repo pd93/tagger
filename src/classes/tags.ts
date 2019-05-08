@@ -4,25 +4,24 @@ import * as vscode from 'vscode';
 import chalk from 'chalk';
 import * as log from '../log';
 import * as utils from '../utils';
-import { Pattern, Tag } from './';
+import { Pattern, Tag, IFiles } from './';
 
 export class Tags extends Array<Tag> {
 
     constructor(
         patterns?: Pattern[],
-        include?: string,
-        exclude?: string
+        files?: IFiles
     ) {
         super();
 
         // If settings provided, update the tags
-        if (patterns && include && exclude) {
-            this.update(patterns, include, exclude);
+        if (patterns && files) {
+            this.update(patterns, files);
         }
     }
 
     // update will update the entire list of tags from scratch
-    public async update(patterns: Pattern[], include: string, exclude: string): Promise<number> {
+    public async update(patterns: Pattern[], files: IFiles): Promise<number> {
 
         log.Info("Updating tags...");
 
@@ -32,7 +31,7 @@ export class Tags extends Array<Tag> {
         let failed: number = 0;
 
 		// Get a list of files in the workspace
-        let uris = await vscode.workspace.findFiles(include, exclude);
+        let uris = await vscode.workspace.findFiles(files.include, files.exclude);
         
         let pluralFiles = uris.length === 1 ? "" : "s";
 		log.Info(`Found ${uris.length} file${pluralFiles}'`);
@@ -40,8 +39,8 @@ export class Tags extends Array<Tag> {
 		// Loop through the files
 		for (let uri of uris) {
 
-            // Make sure it's not a config file
-            if (!utils.isConfigFile(uri)) {
+            // Check if we should search the file (include & exclude args not needed as findFiles() filters these already)
+            if (utils.shouldSearchFile(uri, files)) {
 
                 // Update the tags
                 let updated = await this.updateForFile(patterns, uri, false);

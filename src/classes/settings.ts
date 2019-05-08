@@ -18,6 +18,13 @@ export interface IStatusBarSettings {
     output: string;
 }
 
+export interface IFiles {
+    include: string;
+    exclude: string;
+    excludeConfigFiles: boolean;
+    excludeGitIgnoredFiles: boolean;
+}
+
 export class Settings {
 
     constructor() {
@@ -27,9 +34,8 @@ export class Settings {
     
     // Variables
     public updateOn!: string;
-    public include!: string;
-    public exclude!: string;
     public goToBehaviour!: string;
+    public files!: IFiles;
     public statusBar!: IStatusBarSettings;
     public defaultPattern!: IDefaultPatternSettings;
     public patterns!: IPatternSettings[];
@@ -48,9 +54,11 @@ export class Settings {
     
         // Get the configs
         let updateOn: string | undefined = config.get("updateOn");
-        let include: string | undefined = config.get("include");
-        let exclude: string | undefined = config.get("exclude");
         let goToBehaviour: string | undefined = config.get("goToBehaviour");
+        let filesInclude: string | undefined = config.get("files.include");
+        let filesExclude: string | undefined = config.get("files.exclude");
+        let filesExcludeConfigFiles: boolean | undefined = config.get("files.excludeConfigFiles");
+        let filesExcludeGitIgnoredFiles: boolean | undefined = config.get("files.excludeGitIgnoredFiles");
         let statusBarEnabled: boolean | undefined = config.get("statusBar.enabled");
         let statusBarOutput: string | undefined = config.get("statusBar.output");
         let defaultPatternFlags: string | undefined = config.get("defaultPattern.flags");
@@ -59,9 +67,13 @@ export class Settings {
 
         // Set the configs
         this.updateOn = updateOn !== undefined ? updateOn : "change";
-        this.include = include !== undefined ? include : "**/*";
-        this.exclude = exclude !== undefined ? exclude : "**/{node_modules,vendor}/**";
         this.goToBehaviour = goToBehaviour !== undefined ? goToBehaviour : "end";
+        this.files = {
+            include: filesInclude !== undefined ? filesInclude : "**/*",
+            exclude: filesExclude !== undefined ? filesExclude : "**/{node_modules,vendor}/**",
+            excludeConfigFiles: filesExcludeConfigFiles !== undefined ? filesExcludeConfigFiles : true,
+            excludeGitIgnoredFiles: filesExcludeGitIgnoredFiles !== undefined ? filesExcludeGitIgnoredFiles : true,
+        };
         this.statusBar = {
             enabled: statusBarEnabled !== undefined ? statusBarEnabled : true,
             output: statusBarOutput !== undefined ? statusBarOutput : "$(tag) {all}"
