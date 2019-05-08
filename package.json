@@ -1,0 +1,338 @@
+{
+    "name": "tagger",
+    "displayName": "Tagger",
+    "description": "An extension for Visual Studio Code to browse, highlight and manage in-code tags, todos and notes",
+    "version": "1.0.0",
+    "license": "SEE LICENSE IN LICENSE",
+    "publisher": "pd93",
+    "author": {
+        "name": "Peter Davison"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/pd93/vscode-tagger"
+    },
+    "engines": {
+        "vscode": "^1.30.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "keywords": [
+        "tagger",
+        "tag",
+        "tags",
+        "todo",
+        "todos",
+        "note",
+        "notes",
+        "highlight",
+        "highlighter"
+    ],
+    "activationEvents": [
+        "*"
+    ],
+    "main": "./out/src/extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "tagger.refreshActivityBar",
+                "title": "Tagger: Refresh Activity Bar"
+            },
+            {
+                "command": "tagger.refreshStatusBar",
+                "title": "Tagger: Refresh Status Bar"
+            },
+            {
+                "command": "tagger.refreshDecorations",
+                "title": "Tagger: Refresh Decorations"
+            },
+            {
+                "command": "tagger.refresh",
+                "title": "Tagger: Refresh",
+                "icon": {
+                    "light": "res/light/refresh.svg",
+                    "dark": "res/dark/refresh.svg"
+                }
+            },
+            {
+                "command": "tagger.goToTag",
+                "title": "Tagger: Go to Tag",
+                "icon": {
+                    "light": "res/light/go.svg",
+                    "dark": "res/dark/go.svg"
+                }
+            },
+            {
+                "command": "tagger.deleteTag",
+                "title": "Tagger: Delete Tag",
+                "icon": {
+                    "light": "res/light/delete.svg",
+                    "dark": "res/dark/delete.svg"
+                }
+            }
+        ],
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "tagger",
+                    "title": "Tagger",
+                    "icon": "res/tagger.svg"
+                }
+            ]
+        },
+        "views": {
+            "tagger": [
+                {
+                    "id": "tagger-tags",
+                    "name": "Tags"
+                }
+            ]
+        },
+        "menus": {
+            "view/title": [
+                {
+                    "command": "tagger.refresh",
+                    "when": "view == tagger-tags",
+                    "group": "navigation"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "tagger.goToTag",
+                    "when": "view == tagger-tags && viewItem == tagTreeItem",
+                    "group": "inline"
+                },
+                {
+                    "command": "tagger.deleteTag",
+                    "when": "view == tagger-tags && viewItem == tagTreeItem",
+                    "group": "inline"
+                }
+            ]
+        },
+        "configuration": {
+            "title": "Tagger configuration",
+            "properties": {
+                "tagger": {
+                    "type": "object",
+                    "description": "Tagger configuration options.",
+                    "properties": {
+                        "updateOn": {
+                            "type": "string",
+                            "enum": [
+                                "change",
+                                "save",
+                                "manual"
+                            ],
+                            "default": "change",
+                            "description": "Whether tagger should update tags when a file is changed or when it is saved."
+                        },
+                        "goToBehaviour": {
+                            "type": "string",
+                            "enum": [
+                                "start",
+                                "end",
+                                "highlight"
+                            ],
+                            "default": "end",
+                            "description": "Set the cursor behaviour when navigating to a tag."
+                        },
+                        "files": {
+                            "type": "object",
+                            "description": "Control which files should be included/excluded from tagger's search.",
+                            "properties": {
+                                "include": {
+                                    "type": "string",
+                                    "default": "**/*",
+                                    "description": "Glob pattern for files to include when searching for tags."
+                                },
+                                "exclude": {
+                                    "type": "string",
+                                    "default": "**/{node_modules,vendor}/**",
+                                    "description": "Glob pattern for files to exclude when searching for tags."
+                                },
+                                "excludeConfigFiles": {
+                                    "type": "boolean",
+                                    "default": true,
+                                    "description": "Whether or not we should exclude config files (eg. settings.json)."
+                                },
+                                "excludeGitIgnoredFiles": {
+                                    "type": "boolean",
+                                    "default": true,
+                                    "description": "Whether or not we should exclude files that are ignored by Git (via the .gitignore file)."
+                                }
+                            }
+                        },
+                        "statusBar": {
+                            "type": "object",
+                            "description": "Display settings for the tagger status bar item.",
+                            "properties": {
+                                "enabled": {
+                                    "type": "boolean",
+                                    "default": true,
+                                    "description": "Whether or not the status bar item should be displayed."
+                                },
+                                "output": {
+                                    "type": "string",
+                                    "default": "$(tag) {all}",
+                                    "description": "Describes what to display in the status bar. Icons can be displayed with the `$(icon)` sytnax where 'icon' can be any Octicon name (see https://octicons.github.com). You can also insert tagger values with the `{value}` syntax where 'value' can be `all` or the name of a tag."
+                                }
+                            }
+                        },
+                        "defaultPattern": {
+                            "type": "object",
+                            "description": "Default tag settings.",
+                            "properties": {
+                                "flags": {
+                                    "type": "string",
+                                    "default": "g",
+                                    "description": "A set of flags for the regular expression."
+                                },
+                                "style": {
+                                    "type": "object",
+                                    "description": "The decorations you would like your tags to have.",
+                                    "properties": {
+                                        "backgroundColor": {
+                                            "type": "string"
+                                        },
+                                        "border": {
+                                            "type": "string"
+                                        },
+                                        "borderColor": {
+                                            "type": "string"
+                                        },
+                                        "borderRadius": {
+                                            "type": "string"
+                                        },
+                                        "borderSpacing": {
+                                            "type": "string"
+                                        },
+                                        "borderStyle": {
+                                            "type": "string"
+                                        },
+                                        "borderWidth": {
+                                            "type": "string"
+                                        },
+                                        "color": {
+                                            "type": "string"
+                                        },
+                                        "fontStyle": {
+                                            "type": "string"
+                                        },
+                                        "fontWeight": {
+                                            "type": "string"
+                                        },
+                                        "opacity": {
+                                            "type": "string"
+                                        },
+                                        "overviewRulerColor": {
+                                            "type": "string"
+                                        },
+                                        "textDecoration": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "patterns": {
+                            "type": "array",
+                            "default": [],
+                            "description": "An array of patterns to match tags with.",
+                            "items": {
+                                "type": "object",
+                                "required": [
+                                    "name",
+                                    "pattern"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "description": "The name of the tag."
+                                    },
+                                    "pattern": {
+                                        "type": "string",
+                                        "description": "A regular expression to match tags with (Remember to double-escape!)."
+                                    },
+                                    "flags": {
+                                        "type": "string",
+                                        "description": "A set of flags for the regular expression (overrides default)."
+                                    },
+                                    "style": {
+                                        "type": "object",
+                                        "description": "The decorations you would like your tag to have (overrides default).",
+                                        "properties": {
+                                            "backgroundColor": {
+                                                "type": "string"
+                                            },
+                                            "border": {
+                                                "type": "string"
+                                            },
+                                            "borderColor": {
+                                                "type": "string"
+                                            },
+                                            "borderRadius": {
+                                                "type": "string"
+                                            },
+                                            "borderSpacing": {
+                                                "type": "string"
+                                            },
+                                            "borderStyle": {
+                                                "type": "string"
+                                            },
+                                            "borderWidth": {
+                                                "type": "string"
+                                            },
+                                            "color": {
+                                                "type": "string"
+                                            },
+                                            "fontStyle": {
+                                                "type": "string"
+                                            },
+                                            "fontWeight": {
+                                                "type": "string"
+                                            },
+                                            "opacity": {
+                                                "type": "string"
+                                            },
+                                            "overviewRulerColor": {
+                                                "type": "string"
+                                            },
+                                            "textDecoration": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "@types/glob": "^7.1.1",
+        "@types/minimatch": "^3.0.3",
+        "@types/mocha": "^2.2.42",
+        "@types/node": "^8.10.25",
+        "decache": "^4.5.0",
+        "glob": "^7.1.3",
+        "istanbul": "^0.4.5",
+        "remap-istanbul": "^0.12.0",
+        "tslint": "^5.8.0",
+        "typescript": "^2.6.1",
+        "vscode": "^1.1.26"
+    },
+    "dependencies": {
+        "chalk": "^2.4.1",
+        "minimatch": "^3.0.4"
+    }
+}
